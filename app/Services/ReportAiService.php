@@ -13,9 +13,15 @@ class ReportAiService
 
     public function __construct()
     {
-        $this->apiKey = config('services.deepseek.api_key', '');
-        $this->model = config('services.deepseek.model', 'deepseek-v4-flash');
-        $this->baseUrl = config('services.deepseek.base_url', 'https://api.deepseek.com');
+        // DeepSeek (Disabled/Disabled for now)
+        // $this->apiKey = config('services.deepseek.api_key', '');
+        // $this->model = config('services.deepseek.model', 'deepseek-v4-flash');
+        // $this->baseUrl = config('services.deepseek.base_url', 'https://api.deepseek.com');
+
+        // Google Gemini
+        $this->apiKey = config('services.gemini.api_key', '');
+        $this->model = config('services.gemini.model', 'gemini-2.5-flash');
+        $this->baseUrl = config('services.gemini.base_url', 'https://generativelanguage.googleapis.com/v1beta/openai');
     }
 
     /**
@@ -24,7 +30,7 @@ class ReportAiService
     public function ask(string $question, array $chatHistory = []): string
     {
         if (empty($this->apiKey)) {
-            return 'API key DeepSeek belum dikonfigurasi.';
+            return 'API key Google Gemini belum dikonfigurasi.';
         }
 
         $systemPrompt = $this->buildSystemPrompt();
@@ -241,18 +247,20 @@ class ReportAiService
         ]);
     }
 
-    /**
-     * Call the DeepSeek API with full messages array.
-     */
     private function callApiWithMessages(array $messages): ?string
     {
         try {
+            // Google Gemini compatibility doesn't require /v1 in its endpoint path
+            $url = str_contains($this->baseUrl, 'generativelanguage.googleapis.com')
+                ? "{$this->baseUrl}/chat/completions"
+                : "{$this->baseUrl}/v1/chat/completions";
+
             $response = Http::timeout(60)
                 ->withHeaders([
                     'Authorization' => 'Bearer ' . $this->apiKey,
                     'Content-Type' => 'application/json',
                 ])
-                ->post("{$this->baseUrl}/v1/chat/completions", [
+                ->post($url, [
                     'model' => $this->model,
                     'messages' => $messages,
                     'temperature' => 0.1,
