@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { Head, Link, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { dashboard, login, register } from '@/routes';
+import { useAppearance } from '@/composables/useAppearance';
+import { Motion } from '@motionone/vue';
 
 withDefaults(
     defineProps<{
@@ -13,446 +15,666 @@ withDefaults(
 );
 
 const page = usePage();
+const { resolvedAppearance, updateAppearance } = useAppearance();
+
+// Theme toggle
+const toggleTheme = () => {
+    updateAppearance(resolvedAppearance.value === 'dark' ? 'light' : 'dark');
+};
+
+// Dynamic branding from App Settings
+const appSettings = computed(() => page.props.appSettings as { name: string; logo: string | null; theme?: string } | undefined);
+const appName = computed(() => appSettings.value?.name || 'SPP Yayasan');
+const appLogo = computed(() => appSettings.value?.logo || null);
+
 const dashboardUrl = computed(() =>
-    page.props.currentTeam ? dashboard(page.props.currentTeam.slug).url : '/',
+    page.props.currentTeam ? dashboard(page.props.currentTeam.slug).url : '/dashboard',
 );
+
+// Tab selection state for Interactive Dashboard Preview
+const activeTab = ref<'overview' | 'transactions' | 'ai'>('overview');
+
+// Mock Data for Live Transactions Feed
+const recentTransactions = [
+    {
+        id: 1,
+        student: 'Aisyah Putri',
+        grade: 'SD IT - Kelas 3A',
+        type: 'SPP Mei 2026',
+        amount: 500000,
+        time: '2 menit yang lalu',
+        initials: 'AP',
+        bgColor: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+    },
+    {
+        id: 2,
+        student: 'Rizky Ramadhan',
+        grade: 'SMP IT - Kelas 8B',
+        type: 'SPP Mei + Uang Kegiatan',
+        amount: 1450000,
+        time: '15 menit yang lalu',
+        initials: 'RR',
+        bgColor: 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+    },
+    {
+        id: 3,
+        student: 'Amanda Kartika',
+        grade: 'SMA Unggulan - Kelas 12C',
+        type: 'Uang Pembangunan (Cicilan)',
+        amount: 1500000,
+        time: '1 jam yang lalu',
+        initials: 'AK',
+        bgColor: 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+    },
+    {
+        id: 4,
+        student: 'Fahri Hamzah',
+        grade: 'TK Islam - A2',
+        type: 'SPP Mei 2026',
+        amount: 350000,
+        time: '2 jam yang lalu',
+        initials: 'FH',
+        bgColor: 'bg-purple-500/10 text-purple-600 dark:text-purple-400'
+    }
+];
+
+// Format Rupiah function
+const formatRupiah = (value: number) => {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(value);
+};
+
+// Handle smooth scroll to preview
+const scrollToPreview = () => {
+    document.getElementById('dashboard-preview')?.scrollIntoView({ behavior: 'smooth' });
+};
 </script>
 
 <template>
-    <Head title="Welcome">
-        <link rel="preconnect" href="https://rsms.me/" />
-        <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <Head title="Selamat Datang - Portal Keuangan & SPP Yayasan">
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+        <meta name="description" content="Portal Administrasi Keuangan Terintegrasi untuk Lembaga Pendidikan Yayasan. Kelola pembayaran SPP bulanan, uang gedung, kegiatan, dan laporan kas secara transparan dan real-time." />
     </Head>
-    <div
-        class="flex min-h-screen flex-col items-center bg-[#FDFDFC] p-6 text-[#1b1b18] lg:justify-center lg:p-8 dark:bg-[#0a0a0a]"
-    >
-        <header
-            class="mb-6 w-full max-w-[335px] text-sm not-has-[nav]:hidden lg:max-w-4xl"
-        >
-            <nav class="flex items-center justify-end gap-4">
-                <Link
-                    v-if="$page.props.auth.user"
-                    :href="dashboardUrl"
-                    class="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
-                >
-                    Dashboard
-                </Link>
-                <template v-else>
-                    <Link
-                        :href="login()"
-                        class="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
+
+    <div class="relative min-h-screen bg-neutral-50 text-neutral-900 transition-colors duration-300 dark:bg-[#09090b] dark:text-neutral-100 overflow-x-hidden font-sans selection:bg-primary/20 selection:text-primary">
+        
+        <!-- Elegant Background Glow Orbs -->
+        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-primary/10 blur-[120px] pointer-events-none dark:bg-primary/5"></div>
+        <div class="absolute top-[40%] right-[-10%] w-[600px] h-[600px] rounded-full bg-amber-500/10 blur-[130px] pointer-events-none dark:bg-amber-500/5"></div>
+        
+        <!-- Floating Glass Header -->
+        <header class="sticky top-0 z-50 w-full px-4 py-4 md:px-8 max-w-7xl mx-auto">
+            <nav class="flex items-center justify-between px-6 py-3 border border-neutral-200/40 dark:border-neutral-800/40 bg-white/70 dark:bg-[#121214]/70 backdrop-blur-xl rounded-full shadow-[0_4px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.2)]">
+                <!-- Branding / Logo -->
+                <div class="flex items-center gap-3">
+                    <div class="flex aspect-square size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground overflow-hidden shadow-md">
+                        <img v-if="appLogo" :src="appLogo" alt="Logo" class="size-full object-cover" />
+                        <svg v-else class="size-5 fill-current text-white dark:text-black" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M12 2L2 22h20L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2zm0-6h2v4h-2z" />
+                        </svg>
+                    </div>
+                    <span class="text-md font-semibold tracking-tight text-neutral-800 dark:text-neutral-100 uppercase">
+                        {{ appName }}
+                    </span>
+                </div>
+
+                <!-- Navigation Action Links -->
+                <div class="flex items-center gap-3">
+                    <!-- Light/Dark Toggle -->
+                    <button 
+                        id="theme-toggle"
+                        @click="toggleTheme" 
+                        class="p-2.5 rounded-full border border-neutral-200/40 dark:border-neutral-800/40 bg-neutral-100/50 hover:bg-neutral-200/50 dark:bg-neutral-800/50 dark:hover:bg-neutral-700/50 text-neutral-600 dark:text-neutral-400 transition-all hover:scale-105 active:scale-95"
+                        title="Ubah Tema"
                     >
-                        Log in
-                    </Link>
+                        <svg v-if="resolvedAppearance === 'dark'" class="w-4 h-4 fill-current" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464-5.636a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-5.636 4.464a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM7 16a1 1 0 100-2H6a1 1 0 100 2h1zm-.464-11.464a1 1 0 010 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM3 10a1 1 0 011-1h1a1 1 0 110 2H4a1 1 0 01-1-1z" />
+                        </svg>
+                        <svg v-else class="w-4 h-4 fill-current" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                        </svg>
+                    </button>
+
+                    <div class="h-6 w-px bg-neutral-200 dark:bg-neutral-800"></div>
+
+                    <!-- Auth Options -->
                     <Link
-                        v-if="canRegister"
-                        :href="register()"
-                        class="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
+                        v-if="$page.props.auth.user"
+                        id="btn-dashboard"
+                        :href="dashboardUrl"
+                        class="px-5 py-2 text-xs font-semibold text-white bg-primary hover:bg-primary/95 dark:text-neutral-900 dark:bg-white dark:hover:bg-neutral-100 rounded-full transition-all shadow-md active:scale-95"
                     >
-                        Register
+                        Masuk Dashboard
                     </Link>
-                </template>
+                    <template v-else>
+                        <Link
+                            id="btn-login"
+                            :href="login()"
+                            class="px-4 py-2 text-xs font-medium text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-neutral-100 transition-colors"
+                        >
+                            Log in
+                        </Link>
+                        <Link
+                            v-if="canRegister"
+                            id="btn-register"
+                            :href="register()"
+                            class="px-5 py-2 text-xs font-semibold text-white bg-primary hover:bg-primary/90 dark:text-neutral-900 dark:bg-white dark:hover:bg-neutral-100 rounded-full transition-all shadow-md active:scale-95"
+                        >
+                            Daftar
+                        </Link>
+                    </template>
+                </div>
             </nav>
         </header>
-        <div
-            class="flex w-full items-center justify-center opacity-100 transition-opacity duration-750 lg:grow starting:opacity-0"
-        >
-            <main
-                class="flex w-full max-w-[335px] flex-col-reverse overflow-hidden rounded-lg lg:max-w-4xl lg:flex-row"
-            >
-                <div
-                    class="flex-1 rounded-br-lg rounded-bl-lg bg-white p-6 pb-12 text-[13px] leading-[20px] shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] lg:rounded-tl-lg lg:rounded-br-none lg:p-20 dark:bg-[#161615] dark:text-[#EDEDEC] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]"
+
+        <!-- Hero Section -->
+        <main class="max-w-7xl mx-auto px-4 py-8 md:px-8 md:py-16">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- Left Column: Title and Descriptions -->
+                <div class="lg:col-span-6 space-y-6 text-left">
+                    <!-- Staggered Entry using Motion One -->
+                    <Motion 
+                        tag="div"
+                        :initial="{ opacity: 0, y: -12 }"
+                        :animate="{ opacity: 1, y: 0 }"
+                        :transition="{ duration: 0.6, easing: [0.16, 1, 0.3, 1] }"
+                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-semibold tracking-wide uppercase"
+                    >
+                        <span class="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+                        Dashboard Keuangan Yayasan Pintar
+                    </Motion>
+                    
+                    <Motion 
+                        tag="h1"
+                        :initial="{ opacity: 0, y: 18 }"
+                        :animate="{ opacity: 1, y: 0 }"
+                        :transition="{ delay: 0.12, duration: 0.75, easing: [0.16, 1, 0.3, 1] }"
+                        class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight"
+                    >
+                        Administrasi SPP & Keuangan
+                        <span class="bg-gradient-to-r from-primary to-amber-500 bg-clip-text text-transparent block mt-1">
+                            Modern & Transparan
+                        </span>
+                    </Motion>
+                    
+                    <Motion 
+                        tag="p"
+                        :initial="{ opacity: 0, y: 18 }"
+                        :animate="{ opacity: 1, y: 0 }"
+                        :transition="{ delay: 0.22, duration: 0.75, easing: [0.16, 1, 0.3, 1] }"
+                        class="text-neutral-600 dark:text-neutral-400 text-lg leading-relaxed max-w-xl"
+                    >
+                        Satu platform inovatif untuk mengotomatisasi tagihan rutin SPP bulanan, pencatatan kas terpusat, dan pelaporan keuangan real-time terintegrasi untuk seluruh unit TK, SD, SMP, & SMA di bawah satu yayasan.
+                    </Motion>
+
+                    <!-- Interactive Buttons with Spring Transitions -->
+                    <Motion 
+                        tag="div"
+                        :initial="{ opacity: 0, y: 18 }"
+                        :animate="{ opacity: 1, y: 0 }"
+                        :transition="{ delay: 0.32, duration: 0.75, easing: [0.16, 1, 0.3, 1] }"
+                        class="flex flex-col sm:flex-row gap-4 pt-2"
+                    >
+                        <button
+                            id="hero-cta-preview"
+                            @click="scrollToPreview"
+                            class="flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all hover:translate-y-[-2px] active:translate-y-[0]"
+                        >
+                            <svg class="w-4 h-4 fill-none stroke-current" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            Lihat Preview Dashboard
+                        </button>
+                        
+                        <Link
+                            v-if="!$page.props.auth.user"
+                            :href="login()"
+                            class="flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/50 hover:bg-white dark:bg-neutral-900/50 dark:hover:bg-neutral-900 transition-all hover:translate-y-[-2px] active:translate-y-[0]"
+                        >
+                            Masuk ke Portal
+                            <svg class="w-4 h-4 stroke-current fill-none" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                        </Link>
+                        <Link
+                            v-else
+                            :href="dashboardUrl"
+                            class="flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/50 hover:bg-white dark:bg-neutral-900/50 dark:hover:bg-neutral-900 transition-all hover:translate-y-[-2px] active:translate-y-[0]"
+                        >
+                            Buka Dashboard
+                            <svg class="w-4 h-4 stroke-current fill-none" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                        </Link>
+                    </Motion>
+
+                    <!-- Micro-facts grid -->
+                    <Motion 
+                        tag="div"
+                        :initial="{ opacity: 0, y: 18 }"
+                        :animate="{ opacity: 1, y: 0 }"
+                        :transition="{ delay: 0.42, duration: 0.75, easing: [0.16, 1, 0.3, 1] }"
+                        class="grid grid-cols-3 gap-4 pt-6 border-t border-neutral-200/50 dark:border-neutral-800/50 max-w-md"
+                    >
+                        <div>
+                            <p class="text-2xl font-bold text-primary">100%</p>
+                            <p class="text-xs text-neutral-500 dark:text-neutral-500">Transparan & Real-Time</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-amber-500">4 Unit</p>
+                            <p class="text-xs text-neutral-500 dark:text-neutral-500">Lembaga Terintegrasi</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-emerald-500">10x</p>
+                            <p class="text-xs text-neutral-500 dark:text-neutral-500">Lebih Efisien & Cepat</p>
+                        </div>
+                    </Motion>
+                </div>
+
+                <!-- Right Column: Interactive macOS Tahoe Premium Dashboard Mockup with Spring Entrance -->
+                <Motion 
+                    tag="div"
+                    :initial="{ opacity: 0, scale: 0.95, y: 30 }"
+                    :animate="{ opacity: 1, scale: 1, y: 0 }"
+                    :transition="{ delay: 0.2, type: 'spring', stiffness: 100, damping: 16 }"
+                    class="lg:col-span-6 w-full max-w-xl mx-auto" 
+                    id="dashboard-preview"
                 >
-                    <h1 class="mb-1 font-medium">Let's get started</h1>
-                    <p class="mb-2 text-[#706f6c] dark:text-[#A1A09A]">
-                        Laravel has an incredibly rich ecosystem. <br />We
-                        suggest starting with the following.
+                    <div class="tahoe-window relative">
+                        
+                        <!-- macOS Title Bar Style -->
+                        <div class="tahoe-title-bar">
+                            <div class="flex items-center gap-1.5">
+                                <span class="h-3 w-3 rounded-full bg-[#FF5F56] border border-[#E0443E] block"></span>
+                                <span class="h-3 w-3 rounded-full bg-[#FFBD2E] border border-[#DEA123] block"></span>
+                                <span class="h-3 w-3 rounded-full bg-[#27C93F] border border-[#1AAB29] block"></span>
+                            </div>
+                            <span class="text-xs font-semibold text-neutral-500 dark:text-neutral-400 select-none">
+                                Portal Keuangan Yayasan - Live Preview
+                            </span>
+                            <div class="w-12"></div>
+                        </div>
+
+                        <!-- Mini Mock Navigation Tab Selector inside Window -->
+                        <div class="flex items-center gap-1.5 px-4 py-2 bg-neutral-100/55 dark:bg-neutral-800/55 border-b border-neutral-200/40 dark:border-neutral-800/40">
+                            <button
+                                @click="activeTab = 'overview'"
+                                :class="[
+                                    'px-3 py-1.5 text-[11px] font-semibold rounded-md transition-all flex items-center gap-1.5',
+                                    activeTab === 'overview'
+                                        ? 'bg-white text-neutral-900 shadow-xs dark:bg-neutral-700 dark:text-white'
+                                        : 'text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200'
+                                ]"
+                            >
+                                <svg class="w-3.5 h-3.5 fill-none stroke-current" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.003 9.003 0 1020.945 13H11V3.055z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                                </svg>
+                                Ikhtisar Keuangan
+                            </button>
+                            <button
+                                @click="activeTab = 'transactions'"
+                                :class="[
+                                    'px-3 py-1.5 text-[11px] font-semibold rounded-md transition-all flex items-center gap-1.5',
+                                    activeTab === 'transactions'
+                                        ? 'bg-white text-neutral-900 shadow-xs dark:bg-neutral-700 dark:text-white'
+                                        : 'text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200'
+                                ]"
+                            >
+                                <svg class="w-3.5 h-3.5 fill-none stroke-current" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                </svg>
+                                Transaksi Live
+                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                            </button>
+                            <button
+                                @click="activeTab = 'ai'"
+                                :class="[
+                                    'px-3 py-1.5 text-[11px] font-semibold rounded-md transition-all flex items-center gap-1.5',
+                                    activeTab === 'ai'
+                                        ? 'bg-white text-neutral-900 shadow-xs dark:bg-neutral-700 dark:text-white'
+                                        : 'text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200'
+                                ]"
+                            >
+                                <svg class="w-3.5 h-3.5 fill-none stroke-current" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                </svg>
+                                Analisis AI
+                            </button>
+                        </div>
+
+                        <!-- Window Content Panels with Dynamic Cross-Fades using Motion One -->
+                        <div class="p-5 min-h-[350px] flex flex-col justify-between overflow-hidden">
+                            
+                            <!-- TAB 1: OVERVIEW PANEL -->
+                            <Motion 
+                                v-if="activeTab === 'overview'" 
+                                key="overview"
+                                :initial="{ opacity: 0, y: 10 }"
+                                :animate="{ opacity: 1, y: 0 }"
+                                :transition="{ duration: 0.35, easing: 'ease-out' }"
+                                class="space-y-5"
+                            >
+                                <!-- KPI Cards Row -->
+                                <div class="grid grid-cols-3 gap-3">
+                                    <div class="p-3 bg-neutral-100/50 dark:bg-neutral-800/40 border border-neutral-200/20 rounded-xl space-y-1">
+                                        <p class="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Penerimaan SPP</p>
+                                        <p class="text-sm font-bold text-neutral-800 dark:text-neutral-200 truncate">482,5jt</p>
+                                        <span class="inline-flex items-center text-[9px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                                            +12.4%
+                                        </span>
+                                    </div>
+                                    <div class="p-3 bg-neutral-100/50 dark:bg-neutral-800/40 border border-neutral-200/20 rounded-xl space-y-1">
+                                        <p class="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Kepatuhan SPP</p>
+                                        <p class="text-sm font-bold text-neutral-800 dark:text-neutral-200">94.8%</p>
+                                        <!-- Mini horizontal progress bar -->
+                                        <div class="w-full h-1.5 bg-neutral-200 dark:bg-neutral-700 rounded-full overflow-hidden">
+                                            <div class="h-full bg-primary rounded-full" style="width: 94.8%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="p-3 bg-neutral-100/50 dark:bg-neutral-800/40 border border-neutral-200/20 rounded-xl space-y-1">
+                                        <p class="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Kas Yayasan</p>
+                                        <p class="text-sm font-bold text-neutral-800 dark:text-neutral-200">1,28 M</p>
+                                        <span class="inline-flex items-center text-[9px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                                            Stabil
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Custom Area Line Chart using SVG (Highly Elegant) -->
+                                <div class="relative p-4 bg-neutral-50/50 dark:bg-neutral-900/40 border border-neutral-200/20 rounded-2xl">
+                                    <p class="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider mb-3">Tren Penerimaan Kas (6 Bulan Terakhir)</p>
+                                    
+                                    <div class="h-32 w-full">
+                                        <svg class="w-full h-full overflow-visible" viewBox="0 0 500 120" preserveAspectRatio="none">
+                                            <!-- Chart Gradient Definition -->
+                                            <defs>
+                                                <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.25" />
+                                                    <stop offset="100%" stop-color="var(--primary)" stop-opacity="0" />
+                                                </linearGradient>
+                                            </defs>
+                                            
+                                            <!-- Grid lines -->
+                                            <line x1="0" y1="30" x2="500" y2="30" stroke="rgba(150,150,150,0.1)" stroke-dasharray="3" />
+                                            <line x1="0" y1="60" x2="500" y2="60" stroke="rgba(150,150,150,0.1)" stroke-dasharray="3" />
+                                            <line x1="0" y1="90" x2="500" y2="90" stroke="rgba(150,150,150,0.1)" stroke-dasharray="3" />
+                                            
+                                            <!-- Dynamic curved path area -->
+                                            <path d="M 0 100 Q 80 85 100 95 T 200 45 T 300 65 T 400 35 T 500 20 L 500 120 L 0 120 Z" fill="url(#chartGradient)" />
+                                            
+                                            <!-- Dynamic curved stroke line -->
+                                            <path d="M 0 100 Q 80 85 100 95 T 200 45 T 300 65 T 400 35 T 500 20" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" />
+                                            
+                                            <!-- Points of interest -->
+                                            <circle cx="200" cy="45" r="4.5" fill="var(--primary)" stroke="white" stroke-width="1.5" />
+                                            <circle cx="500" cy="20" r="4.5" fill="var(--primary)" stroke="white" stroke-width="1.5" />
+                                        </svg>
+                                    </div>
+                                    
+                                    <!-- Chart X Axis labels -->
+                                    <div class="flex justify-between items-center text-[9px] text-neutral-400 font-bold uppercase tracking-wider mt-1 px-1">
+                                        <span>Nov</span>
+                                        <span>Des</span>
+                                        <span>Jan</span>
+                                        <span>Feb</span>
+                                        <span>Mar</span>
+                                        <span class="text-primary">Apr</span>
+                                    </div>
+                                </div>
+                            </Motion>
+
+                            <!-- TAB 2: LIVE TRANSACTIONS PANEL -->
+                            <Motion 
+                                v-if="activeTab === 'transactions'" 
+                                key="transactions"
+                                :initial="{ opacity: 0, y: 10 }"
+                                :animate="{ opacity: 1, y: 0 }"
+                                :transition="{ duration: 0.35, easing: 'ease-out' }"
+                                class="space-y-3.5"
+                            >
+                                <div class="flex items-center justify-between border-b border-neutral-200/30 pb-2">
+                                    <p class="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Aktivitas Pembayaran SPP Masuk</p>
+                                    <span class="flex items-center gap-1 text-[9px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                                        Terhubung
+                                    </span>
+                                </div>
+
+                                <!-- Transaction list loop -->
+                                <div class="space-y-2.5 max-h-[250px] overflow-y-auto pr-1">
+                                    <div 
+                                        v-for="tx in recentTransactions" 
+                                        :key="tx.id"
+                                        class="flex items-center justify-between p-2.5 rounded-xl bg-neutral-100/50 hover:bg-neutral-100 dark:bg-neutral-800/40 dark:hover:bg-neutral-800/70 border border-neutral-200/10 transition-all duration-200"
+                                    >
+                                        <div class="flex items-center gap-3">
+                                            <!-- Initials Avatar -->
+                                            <div :class="[tx.bgColor, 'flex aspect-square size-8 items-center justify-center rounded-lg font-bold text-xs shadow-xs']">
+                                                {{ tx.initials }}
+                                            </div>
+                                            <div class="text-left space-y-0.5">
+                                                <p class="text-xs font-bold text-neutral-800 dark:text-neutral-200">{{ tx.student }}</p>
+                                                <p class="text-[9px] font-medium text-neutral-400 dark:text-neutral-500">{{ tx.grade }} &bull; {{ tx.type }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right space-y-0.5">
+                                            <p class="text-xs font-bold text-emerald-500">{{ formatRupiah(tx.amount) }}</p>
+                                            <p class="text-[9px] text-neutral-400">{{ tx.time }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Motion>
+
+                            <!-- TAB 3: AI ANALYSIS PANEL -->
+                            <Motion 
+                                v-if="activeTab === 'ai'" 
+                                key="ai"
+                                :initial="{ opacity: 0, y: 10 }"
+                                :animate="{ opacity: 1, y: 0 }"
+                                :transition="{ duration: 0.35, easing: 'ease-out' }"
+                                class="space-y-4"
+                            >
+                                <div class="flex items-center justify-between border-b border-neutral-200/30 pb-2">
+                                    <p class="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Asisten Finansial AI Terintegrasi</p>
+                                    <span class="text-[9px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                        Generative Insight
+                                    </span>
+                                </div>
+
+                                <!-- Conversations Mockup -->
+                                <div class="space-y-3 text-xs">
+                                    <!-- User Bubble -->
+                                    <div class="flex items-start gap-2.5 max-w-[85%]">
+                                        <div class="size-6 rounded-md bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center text-[10px] font-bold shrink-0">BD</div>
+                                        <div class="p-2.5 rounded-2xl rounded-tl-none bg-neutral-100/70 dark:bg-neutral-800/40 border border-neutral-200/10 text-left leading-relaxed">
+                                            Bagaimana status penagihan SPP SMP bulan ini dibandingkan dengan bulan kemarin?
+                                        </div>
+                                    </div>
+
+                                    <!-- AI Bubble -->
+                                    <div class="flex items-start gap-2.5 max-w-[90%] ml-auto flex-row-reverse">
+                                        <div class="size-6 rounded-md bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-bold shrink-0">AI</div>
+                                        <div class="p-3 rounded-2xl rounded-tr-none bg-primary/5 border border-primary/20 text-left leading-relaxed space-y-2">
+                                            <p>
+                                                Tingkat kepatuhan SPP SMP bulan ini mencapai <strong class="text-primary">94.8%</strong>, mengalami kenaikan sebesar <strong class="text-emerald-500">+2.4%</strong> dibandingkan bulan lalu (<strong class="text-neutral-500">92.4%</strong>).
+                                            </p>
+                                            
+                                            <!-- Miniature bar chart comparison -->
+                                            <div class="flex items-end gap-6 pt-2 pb-1 px-4 border-t border-primary/10">
+                                                <div class="space-y-1 text-center">
+                                                    <div class="w-7 bg-neutral-300 dark:bg-neutral-700 rounded-t-sm" style="height: 48px"></div>
+                                                    <span class="text-[8px] text-neutral-400 font-bold block">Mar (92.4%)</span>
+                                                </div>
+                                                <div class="space-y-1 text-center">
+                                                    <div class="w-7 bg-primary rounded-t-sm shadow-xs" style="height: 60px"></div>
+                                                    <span class="text-[8px] text-primary font-bold block">Apr (94.8%)</span>
+                                                </div>
+                                                <div class="text-[9px] text-neutral-500 dark:text-neutral-400 self-center pl-2 space-y-0.5">
+                                                    <p class="font-bold text-neutral-700 dark:text-neutral-300">Rekomendasi AI:</p>
+                                                    <p>Kirim pengingat WhatsApp otomatis ke 5.2% wali murid tersisa.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Motion>
+
+                            <!-- Elegant Footer Info Inside Window Mockup -->
+                            <div class="pt-3 border-t border-neutral-200/30 flex items-center justify-between text-[9px] text-neutral-400 dark:text-neutral-500 font-bold uppercase tracking-wider mt-4">
+                                <span class="flex items-center gap-1">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-primary block"></span>
+                                    Lembaga Aktif: 4 Unit
+                                </span>
+                                <span>SSL Encrypted &bull; ISO 27001 Secured</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </Motion>
+
+            </div>
+        </main>
+
+        <!-- Core Features Section -->
+        <section class="max-w-7xl mx-auto px-4 py-16 md:px-8 border-t border-neutral-200/50 dark:border-neutral-800/50">
+            <div class="text-center space-y-4 mb-16">
+                <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight">
+                    Mengapa Memilih Platform Kami?
+                </h2>
+                <p class="text-neutral-500 dark:text-neutral-400 max-w-xl mx-auto">
+                    Kemudahan tata kelola administrasi dana pendidikan terstruktur secara aman bagi bendahara sekolah, admin yayasan, dan orang tua.
+                </p>
+            </div>
+
+            <!-- Features Grid using Motion One Elastic Springs -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Feature Card 1 -->
+                <Motion
+                    tag="div"
+                    :hover="{ y: -6, scale: 1.025 }"
+                    :transition="{ type: 'spring', stiffness: 200, damping: 18 }"
+                    class="tahoe-card space-y-4 group cursor-pointer"
+                >
+                    <div class="p-3 w-fit rounded-xl bg-primary/10 text-primary dark:bg-primary/20 transition-all group-hover:scale-110">
+                        <svg class="w-6 h-6 stroke-current fill-none" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-neutral-800 dark:text-neutral-100">Manajemen Multi-Lembaga</h3>
+                    <p class="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">
+                        Kelola data keuangan seluruh unit sekolah (TK, SD, SMP, SMA) secara sentralisasi dalam satu dashboard terpadu tanpa berpindah portal.
                     </p>
-                    <ul class="mb-4 flex flex-col lg:mb-6">
-                        <li
-                            class="relative flex items-center gap-4 py-2 before:absolute before:top-1/2 before:bottom-0 before:left-[0.4rem] before:border-l before:border-[#e3e3e0] dark:before:border-[#3E3E3A]"
-                        >
-                            <span
-                                class="relative bg-white py-1 dark:bg-[#161615]"
-                            >
-                                <span
-                                    class="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-[#e3e3e0] bg-[#FDFDFC] shadow-[0px_0px_1px_0px_rgba(0,0,0,0.03),0px_1px_2px_0px_rgba(0,0,0,0.06)] dark:border-[#3E3E3A] dark:bg-[#161615]"
-                                >
-                                    <span
-                                        class="h-1.5 w-1.5 rounded-full bg-[#dbdbd7] dark:bg-[#3E3E3A]"
-                                    />
-                                </span>
-                            </span>
-                            <span>
-                                Read the
-                                <a
-                                    href="https://laravel.com/docs"
-                                    target="_blank"
-                                    class="ml-1 inline-flex items-center space-x-1 font-medium text-[#f53003] underline underline-offset-4 dark:text-[#FF4433]"
-                                >
-                                    <span>Documentation</span>
-                                    <svg
-                                        width="10"
-                                        height="11"
-                                        viewBox="0 0 10 11"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="h-2.5 w-2.5"
-                                    >
-                                        <path
-                                            d="M7.70833 6.95834V2.79167H3.54167M2.5 8L7.5 3.00001"
-                                            stroke="currentColor"
-                                            stroke-linecap="square"
-                                        />
-                                    </svg>
-                                </a>
-                            </span>
-                        </li>
-                        <li
-                            class="relative flex items-center gap-4 py-2 before:absolute before:top-0 before:bottom-1/2 before:left-[0.4rem] before:border-l before:border-[#e3e3e0] dark:before:border-[#3E3E3A]"
-                        >
-                            <span
-                                class="relative bg-white py-1 dark:bg-[#161615]"
-                            >
-                                <span
-                                    class="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-[#e3e3e0] bg-[#FDFDFC] shadow-[0px_0px_1px_0px_rgba(0,0,0,0.03),0px_1px_2px_0px_rgba(0,0,0,0.06)] dark:border-[#3E3E3A] dark:bg-[#161615]"
-                                >
-                                    <span
-                                        class="h-1.5 w-1.5 rounded-full bg-[#dbdbd7] dark:bg-[#3E3E3A]"
-                                    />
-                                </span>
-                            </span>
-                            <span>
-                                Watch video tutorials at
-                                <a
-                                    href="https://laracasts.com"
-                                    target="_blank"
-                                    class="ml-1 inline-flex items-center space-x-1 font-medium text-[#f53003] underline underline-offset-4 dark:text-[#FF4433]"
-                                >
-                                    <span>Laracasts</span>
-                                    <svg
-                                        width="10"
-                                        height="11"
-                                        viewBox="0 0 10 11"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="h-2.5 w-2.5"
-                                    >
-                                        <path
-                                            d="M7.70833 6.95834V2.79167H3.54167M2.5 8L7.5 3.00001"
-                                            stroke="currentColor"
-                                            stroke-linecap="square"
-                                        />
-                                    </svg>
-                                </a>
-                            </span>
-                        </li>
-                    </ul>
-                    <ul class="flex gap-3 text-sm leading-normal">
-                        <li>
-                            <a
-                                href="https://cloud.laravel.com"
-                                target="_blank"
-                                class="inline-block rounded-sm border border-black bg-[#1b1b18] px-5 py-1.5 text-sm leading-normal text-white hover:border-black hover:bg-black dark:border-[#eeeeec] dark:bg-[#eeeeec] dark:text-[#1C1C1A] dark:hover:border-white dark:hover:bg-white"
-                            >
-                                Deploy now
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                <div
-                    class="relative -mb-px aspect-[335/364] w-full shrink-0 overflow-hidden rounded-t-lg bg-[#fff2f2] lg:mb-0 lg:-ml-px lg:aspect-auto lg:w-[438px] lg:rounded-t-none lg:rounded-r-lg dark:bg-[#1D0002]"
+                </Motion>
+
+                <!-- Feature Card 2 -->
+                <Motion
+                    tag="div"
+                    :hover="{ y: -6, scale: 1.025 }"
+                    :transition="{ type: 'spring', stiffness: 200, damping: 18 }"
+                    class="tahoe-card space-y-4 group cursor-pointer"
                 >
-                    <!-- Laravel Logo -->
-                    <svg
-                        class="w-full max-w-none translate-y-0 text-[#F53003] opacity-100 transition-all duration-750 dark:text-[#F61500] starting:opacity-0 motion-safe:starting:translate-y-6"
-                        viewBox="0 0 438 104"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <path
-                            d="M17.2036 -3H0V102.197H49.5189V86.7187H17.2036V-3Z"
-                            fill="currentColor"
-                        />
-                        <path
-                            d="M110.256 41.6337C108.061 38.1275 104.945 35.3731 100.905 33.3681C96.8667 31.3647 92.8016 30.3618 88.7131 30.3618C83.4247 30.3618 78.5885 31.3389 74.201 33.2923C69.8111 35.2456 66.0474 37.928 62.9059 41.3333C59.7643 44.7401 57.3198 48.6726 55.5754 53.1293C53.8287 57.589 52.9572 62.274 52.9572 67.1813C52.9572 72.1925 53.8287 76.8995 55.5754 81.3069C57.3191 85.7173 59.7636 89.6241 62.9059 93.0293C66.0474 96.4361 69.8119 99.1155 74.201 101.069C78.5885 103.022 83.4247 103.999 88.7131 103.999C92.8016 103.999 96.8667 102.997 100.905 100.994C104.945 98.9911 108.061 96.2359 110.256 92.7282V102.195H126.563V32.1642H110.256V41.6337ZM108.76 75.7472C107.762 78.4531 106.366 80.8078 104.572 82.8112C102.776 84.8161 100.606 86.4183 98.0637 87.6206C95.5202 88.823 92.7004 89.4238 89.6103 89.4238C86.5178 89.4238 83.7252 88.823 81.2324 87.6206C78.7388 86.4183 76.5949 84.8161 74.7998 82.8112C73.004 80.8078 71.6319 78.4531 70.6856 75.7472C69.7356 73.0421 69.2644 70.1868 69.2644 67.1821C69.2644 64.1758 69.7356 61.3205 70.6856 58.6154C71.6319 55.9102 73.004 53.5571 74.7998 51.5522C76.5949 49.5495 78.738 47.9451 81.2324 46.7427C83.7252 45.5404 86.5178 44.9396 89.6103 44.9396C92.7012 44.9396 95.5202 45.5404 98.0637 46.7427C100.606 47.9451 102.776 49.5487 104.572 51.5522C106.367 53.5571 107.762 55.9102 108.76 58.6154C109.756 61.3205 110.256 64.1758 110.256 67.1821C110.256 70.1868 109.756 73.0421 108.76 75.7472Z"
-                            fill="currentColor"
-                        />
-                        <path
-                            d="M242.805 41.6337C240.611 38.1275 237.494 35.3731 233.455 33.3681C229.416 31.3647 225.351 30.3618 221.262 30.3618C215.974 30.3618 211.138 31.3389 206.75 33.2923C202.36 35.2456 198.597 37.928 195.455 41.3333C192.314 44.7401 189.869 48.6726 188.125 53.1293C186.378 57.589 185.507 62.274 185.507 67.1813C185.507 72.1925 186.378 76.8995 188.125 81.3069C189.868 85.7173 192.313 89.6241 195.455 93.0293C198.597 96.4361 202.361 99.1155 206.75 101.069C211.138 103.022 215.974 103.999 221.262 103.999C225.351 103.999 229.416 102.997 233.455 100.994C237.494 98.9911 240.611 96.2359 242.805 92.7282V102.195H259.112V32.1642H242.805V41.6337ZM241.31 75.7472C240.312 78.4531 238.916 80.8078 237.122 82.8112C235.326 84.8161 233.156 86.4183 230.614 87.6206C228.07 88.823 225.251 89.4238 222.16 89.4238C219.068 89.4238 216.275 88.823 213.782 87.6206C211.289 86.4183 209.145 84.8161 207.35 82.8112C205.554 80.8078 204.182 78.4531 203.236 75.7472C202.286 73.0421 201.814 70.1868 201.814 67.1821C201.814 64.1758 202.286 61.3205 203.236 58.6154C204.182 55.9102 205.554 53.5571 207.35 51.5522C209.145 49.5495 211.288 47.9451 213.782 46.7427C216.275 45.5404 219.068 44.9396 222.16 44.9396C225.251 44.9396 228.07 45.5404 230.614 46.7427C233.156 47.9451 235.326 49.5487 237.122 51.5522C238.917 53.5571 240.312 55.9102 241.31 58.6154C242.306 61.3205 242.806 64.1758 242.806 67.1821C242.805 70.1868 242.305 73.0421 241.31 75.7472Z"
-                            fill="currentColor"
-                        />
-                        <path
-                            d="M438 -3H421.694V102.197H438V-3Z"
-                            fill="currentColor"
-                        />
-                        <path
-                            d="M139.43 102.197H155.735V48.2834H183.712V32.1665H139.43V102.197Z"
-                            fill="currentColor"
-                        />
-                        <path
-                            d="M324.49 32.1665L303.995 85.794L283.498 32.1665H266.983L293.748 102.197H314.242L341.006 32.1665H324.49Z"
-                            fill="currentColor"
-                        />
-                        <path
-                            d="M376.571 30.3656C356.603 30.3656 340.797 46.8497 340.797 67.1828C340.797 89.6597 356.094 104 378.661 104C391.29 104 399.354 99.1488 409.206 88.5848L398.189 80.0226C398.183 80.031 389.874 90.9895 377.468 90.9895C363.048 90.9895 356.977 79.3111 356.977 73.269H411.075C413.917 50.1328 398.775 30.3656 376.571 30.3656ZM357.02 61.0967C357.145 59.7487 359.023 43.3761 376.442 43.3761C393.861 43.3761 395.978 59.7464 396.099 61.0967H357.02Z"
-                            fill="currentColor"
-                        />
-                    </svg>
+                    <div class="p-3 w-fit rounded-xl bg-amber-500/10 text-amber-500 dark:bg-amber-500/20 transition-all group-hover:scale-110">
+                        <svg class="w-6 h-6 stroke-current fill-none" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-neutral-800 dark:text-neutral-100">Tagihan SPP Otomatis</h3>
+                    <p class="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">
+                        Generate lembar tagihan rutin SPP bulanan siswa secara massal sesuai kriteria unit pendidikan, angkatan akademik, dan jenis program kelas.
+                    </p>
+                </Motion>
 
-                    <!-- 13 -->
-                    <svg
-                        class="relative -mt-[6.6rem] -ml-8 w-[438px] max-w-none [--stroke-color:#1B1B18] lg:ml-0 dark:[--stroke-color:#FF750F]"
-                        viewBox="0 0 440 392"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <g
-                            class="text-[#1B1B18] opacity-100 mix-blend-darken transition-all delay-300 duration-750 dark:text-black dark:mix-blend-normal starting:opacity-0"
-                        >
-                            <mask
-                                id="path-1-mask"
-                                maskUnits="userSpaceOnUse"
-                                x="-0.328613"
-                                y="103"
-                                width="338"
-                                height="299"
-                                fill="black"
-                            >
-                                <rect
-                                    fill="white"
-                                    x="-0.328613"
-                                    y="103"
-                                    width="338"
-                                    height="299"
-                                />
-                                <path
-                                    d="M234.936 400.8C204.136 400.8 178.936 392.4 159.336 375.6C140.136 358.8 130.536 337 130.536 310.2H200.736C200.736 318.2 203.736 324.8 209.736 330C215.736 335.2 223.736 337.8 233.736 337.8C243.336 337.8 251.136 335 257.136 329.4C263.536 323.8 266.736 316.6 266.736 307.8C266.736 299.8 263.936 293.2 258.336 288C252.736 282.8 245.536 280.2 236.736 280.2H199.536V218.4H236.736C243.536 218.4 249.336 216 254.136 211.2C258.936 206.4 261.336 200.4 261.336 193.2C261.336 184.8 258.736 178.2 253.536 173.4C248.336 168.6 241.736 166.2 233.736 166.2C226.536 166.2 220.336 168.4 215.136 172.8C210.336 177.2 207.936 182.8 207.936 189.6H141.336C141.336 164.8 150.136 144.6 167.736 129C185.336 113 207.936 105 235.536 105C263.136 105 285.536 112.2 302.736 126.6C320.336 141 329.136 160 329.136 183.6C329.136 200.8 324.536 214.8 315.336 225.6C306.136 236 294.336 243.2 279.936 247.2C297.136 252 310.736 260.2 320.736 271.8C331.136 283.4 336.336 298 336.336 315.6C336.336 340.4 326.936 360.8 308.136 376.8C289.336 392.8 264.936 400.8 234.936 400.8Z"
-                                />
-                                <path
-                                    d="M26.8714 167.6H1.67139V105.2H94.6714V400.2H26.8714V167.6Z"
-                                />
-                            </mask>
-                            <path
-                                d="M234.936 400.8C204.136 400.8 178.936 392.4 159.336 375.6C140.136 358.8 130.536 337 130.536 310.2H200.736C200.736 318.2 203.736 324.8 209.736 330C215.736 335.2 223.736 337.8 233.736 337.8C243.336 337.8 251.136 335 257.136 329.4C263.536 323.8 266.736 316.6 266.736 307.8C266.736 299.8 263.936 293.2 258.336 288C252.736 282.8 245.536 280.2 236.736 280.2H199.536V218.4H236.736C243.536 218.4 249.336 216 254.136 211.2C258.936 206.4 261.336 200.4 261.336 193.2C261.336 184.8 258.736 178.2 253.536 173.4C248.336 168.6 241.736 166.2 233.736 166.2C226.536 166.2 220.336 168.4 215.136 172.8C210.336 177.2 207.936 182.8 207.936 189.6H141.336C141.336 164.8 150.136 144.6 167.736 129C185.336 113 207.936 105 235.536 105C263.136 105 285.536 112.2 302.736 126.6C320.336 141 329.136 160 329.136 183.6C329.136 200.8 324.536 214.8 315.336 225.6C306.136 236 294.336 243.2 279.936 247.2C297.136 252 310.736 260.2 320.736 271.8C331.136 283.4 336.336 298 336.336 315.6C336.336 340.4 326.936 360.8 308.136 376.8C289.336 392.8 264.936 400.8 234.936 400.8Z"
-                                fill="currentColor"
-                            />
-                            <path
-                                d="M26.8714 167.6H1.67139V105.2H94.6714V400.2H26.8714V167.6Z"
-                                fill="currentColor"
-                            />
-                            <path
-                                d="M234.936 400.8C204.136 400.8 178.936 392.4 159.336 375.6C140.136 358.8 130.536 337 130.536 310.2H200.736C200.736 318.2 203.736 324.8 209.736 330C215.736 335.2 223.736 337.8 233.736 337.8C243.336 337.8 251.136 335 257.136 329.4C263.536 323.8 266.736 316.6 266.736 307.8C266.736 299.8 263.936 293.2 258.336 288C252.736 282.8 245.536 280.2 236.736 280.2H199.536V218.4H236.736C243.536 218.4 249.336 216 254.136 211.2C258.936 206.4 261.336 200.4 261.336 193.2C261.336 184.8 258.736 178.2 253.536 173.4C248.336 168.6 241.736 166.2 233.736 166.2C226.536 166.2 220.336 168.4 215.136 172.8C210.336 177.2 207.936 182.8 207.936 189.6H141.336C141.336 164.8 150.136 144.6 167.736 129C185.336 113 207.936 105 235.536 105C263.136 105 285.536 112.2 302.736 126.6C320.336 141 329.136 160 329.136 183.6C329.136 200.8 324.536 214.8 315.336 225.6C306.136 236 294.336 243.2 279.936 247.2C297.136 252 310.736 260.2 320.736 271.8C331.136 283.4 336.336 298 336.336 315.6C336.336 340.4 326.936 360.8 308.136 376.8C289.336 392.8 264.936 400.8 234.936 400.8Z"
-                                stroke="var(--stroke-color)"
-                                stroke-width="2.4"
-                                mask="url(#path-1-mask)"
-                            />
-                            <path
-                                d="M26.8714 167.6H1.67139V105.2H94.6714V400.2H26.8714V167.6Z"
-                                stroke="var(--stroke-color)"
-                                stroke-width="2.4"
-                                mask="url(#path-1-mask)"
-                            />
-                        </g>
+                <!-- Feature Card 3 -->
+                <Motion
+                    tag="div"
+                    :hover="{ y: -6, scale: 1.025 }"
+                    :transition="{ type: 'spring', stiffness: 200, damping: 18 }"
+                    class="tahoe-card space-y-4 group cursor-pointer"
+                >
+                    <div class="p-3 w-fit rounded-xl bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20 transition-all group-hover:scale-110">
+                        <svg class="w-6 h-6 stroke-current fill-none" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-neutral-800 dark:text-neutral-100">Laporan Keuangan & AI</h3>
+                    <p class="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">
+                        Pantau sirkulasi dana secara real-time dan analisis tren pendapatan menggunakan asisten kecerdasan buatan (AI) terintegrasi pada dashboard Anda.
+                    </p>
+                </Motion>
+            </div>
+        </section>
 
-                        <g
-                            class="text-[#F3BEC7] opacity-100 transition-all delay-400 duration-750 dark:text-[#4B0600] starting:opacity-0 motion-safe:starting:-translate-x-[26px]"
-                        >
-                            <mask
-                                id="path-2-mask"
-                                maskUnits="userSpaceOnUse"
-                                x="25.3357"
-                                y="103"
-                                width="338"
-                                height="299"
-                                fill="black"
-                            >
-                                <rect
-                                    fill="white"
-                                    x="25.3357"
-                                    y="103"
-                                    width="338"
-                                    height="299"
-                                />
-                                <path
-                                    d="M260.6 400.8C229.8 400.8 204.6 392.4 185 375.6C165.8 358.8 156.2 337 156.2 310.2H226.4C226.4 318.2 229.4 324.8 235.4 330C241.4 335.2 249.4 337.8 259.4 337.8C269 337.8 276.8 335 282.8 329.4C289.2 323.8 292.4 316.6 292.4 307.8C292.4 299.8 289.6 293.2 284 288C278.4 282.8 271.2 280.2 262.4 280.2H225.2V218.4H262.4C269.2 218.4 275 216 279.8 211.2C284.6 206.4 287 200.4 287 193.2C287 184.8 284.4 178.2 279.2 173.4C274 168.6 267.4 166.2 259.4 166.2C252.2 166.2 246 168.4 240.8 172.8C236 177.2 233.6 182.8 233.6 189.6H167C167 164.8 175.8 144.6 193.4 129C211 113 233.6 105 261.2 105C288.8 105 311.2 112.2 328.4 126.6C346 141 354.8 160 354.8 183.6C354.8 200.8 350.2 214.8 341 225.6C331.8 236 320 243.2 305.6 247.2C322.8 252 336.4 260.2 346.4 271.8C356.8 283.4 362 298 362 315.6C362 340.4 352.6 360.8 333.8 376.8C315 392.8 290.6 400.8 260.6 400.8Z"
-                                />
-                                <path
-                                    d="M52.5357 167.6H27.3357V105.2H120.336V400.2H52.5357V167.6Z"
-                                />
-                            </mask>
-                            <path
-                                d="M260.6 400.8C229.8 400.8 204.6 392.4 185 375.6C165.8 358.8 156.2 337 156.2 310.2H226.4C226.4 318.2 229.4 324.8 235.4 330C241.4 335.2 249.4 337.8 259.4 337.8C269 337.8 276.8 335 282.8 329.4C289.2 323.8 292.4 316.6 292.4 307.8C292.4 299.8 289.6 293.2 284 288C278.4 282.8 271.2 280.2 262.4 280.2H225.2V218.4H262.4C269.2 218.4 275 216 279.8 211.2C284.6 206.4 287 200.4 287 193.2C287 184.8 284.4 178.2 279.2 173.4C274 168.6 267.4 166.2 259.4 166.2C252.2 166.2 246 168.4 240.8 172.8C236 177.2 233.6 182.8 233.6 189.6H167C167 164.8 175.8 144.6 193.4 129C211 113 233.6 105 261.2 105C288.8 105 311.2 112.2 328.4 126.6C346 141 354.8 160 354.8 183.6C354.8 200.8 350.2 214.8 341 225.6C331.8 236 320 243.2 305.6 247.2C322.8 252 336.4 260.2 346.4 271.8C356.8 283.4 362 298 362 315.6C362 340.4 352.6 360.8 333.8 376.8C315 392.8 290.6 400.8 260.6 400.8Z"
-                                fill="currentColor"
-                            />
-                            <path
-                                d="M52.5357 167.6H27.3357V105.2H120.336V400.2H52.5357V167.6Z"
-                                fill="currentColor"
-                            />
-                            <path
-                                d="M260.6 400.8C229.8 400.8 204.6 392.4 185 375.6C165.8 358.8 156.2 337 156.2 310.2H226.4C226.4 318.2 229.4 324.8 235.4 330C241.4 335.2 249.4 337.8 259.4 337.8C269 337.8 276.8 335 282.8 329.4C289.2 323.8 292.4 316.6 292.4 307.8C292.4 299.8 289.6 293.2 284 288C278.4 282.8 271.2 280.2 262.4 280.2H225.2V218.4H262.4C269.2 218.4 275 216 279.8 211.2C284.6 206.4 287 200.4 287 193.2C287 184.8 284.4 178.2 279.2 173.4C274 168.6 267.4 166.2 259.4 166.2C252.2 166.2 246 168.4 240.8 172.8C236 177.2 233.6 182.8 233.6 189.6H167C167 164.8 175.8 144.6 193.4 129C211 113 233.6 105 261.2 105C288.8 105 311.2 112.2 328.4 126.6C346 141 354.8 160 354.8 183.6C354.8 200.8 350.2 214.8 341 225.6C331.8 236 320 243.2 305.6 247.2C322.8 252 336.4 260.2 346.4 271.8C356.8 283.4 362 298 362 315.6C362 340.4 352.6 360.8 333.8 376.8C315 392.8 290.6 400.8 260.6 400.8Z"
-                                stroke="var(--stroke-color)"
-                                stroke-width="2.4"
-                                mask="url(#path-2-mask)"
-                            />
-                            <path
-                                d="M52.5357 167.6H27.3357V105.2H120.336V400.2H52.5357V167.6Z"
-                                stroke="var(--stroke-color)"
-                                stroke-width="2.4"
-                                mask="url(#path-2-mask)"
-                            />
-                        </g>
-
-                        <g
-                            class="text-[#F8B803] opacity-100 mix-blend-color transition-all delay-400 duration-750 dark:text-[#391800] dark:mix-blend-hard-light starting:opacity-0 motion-safe:starting:-translate-x-[51px]"
-                        >
-                            <mask
-                                id="path-3-mask"
-                                maskUnits="userSpaceOnUse"
-                                x="51"
-                                y="103"
-                                width="338"
-                                height="299"
-                                fill="black"
-                            >
-                                <rect
-                                    fill="white"
-                                    x="51"
-                                    y="103"
-                                    width="338"
-                                    height="299"
-                                />
-                                <path
-                                    d="M286.264 400.8C255.464 400.8 230.264 392.4 210.664 375.6C191.464 358.8 181.864 337 181.864 310.2H252.064C252.064 318.2 255.064 324.8 261.064 330C267.064 335.2 275.064 337.8 285.064 337.8C294.664 337.8 302.464 335 308.464 329.4C314.864 323.8 318.064 316.6 318.064 307.8C318.064 299.8 315.264 293.2 309.664 288C304.064 282.8 296.864 280.2 288.064 280.2H250.864V218.4H288.064C294.864 218.4 300.664 216 305.464 211.2C310.264 206.4 312.664 200.4 312.664 193.2C312.664 184.8 310.064 178.2 304.864 173.4C299.664 168.6 293.064 166.2 285.064 166.2C277.864 166.2 271.664 168.4 266.464 172.8C261.664 177.2 259.264 182.8 259.264 189.6H192.664C192.664 164.8 201.464 144.6 219.064 129C236.664 113 259.264 105 286.864 105C314.464 105 336.864 112.2 354.064 126.6C371.664 141 380.464 160 380.464 183.6C380.464 200.8 375.864 214.8 366.664 225.6C357.464 236 345.664 243.2 331.264 247.2C348.464 252 362.064 260.2 372.064 271.8C382.464 283.4 387.664 298 387.664 315.6C387.664 340.4 378.264 360.8 359.464 376.8C340.664 392.8 316.264 400.8 286.264 400.8Z"
-                                />
-                                <path
-                                    d="M78.2 167.6H53V105.2H146V400.2H78.2V167.6Z"
-                                />
-                            </mask>
-                            <path
-                                d="M286.264 400.8C255.464 400.8 230.264 392.4 210.664 375.6C191.464 358.8 181.864 337 181.864 310.2H252.064C252.064 318.2 255.064 324.8 261.064 330C267.064 335.2 275.064 337.8 285.064 337.8C294.664 337.8 302.464 335 308.464 329.4C314.864 323.8 318.064 316.6 318.064 307.8C318.064 299.8 315.264 293.2 309.664 288C304.064 282.8 296.864 280.2 288.064 280.2H250.864V218.4H288.064C294.864 218.4 300.664 216 305.464 211.2C310.264 206.4 312.664 200.4 312.664 193.2C312.664 184.8 310.064 178.2 304.864 173.4C299.664 168.6 293.064 166.2 285.064 166.2C277.864 166.2 271.664 168.4 266.464 172.8C261.664 177.2 259.264 182.8 259.264 189.6H192.664C192.664 164.8 201.464 144.6 219.064 129C236.664 113 259.264 105 286.864 105C314.464 105 336.864 112.2 354.064 126.6C371.664 141 380.464 160 380.464 183.6C380.464 200.8 375.864 214.8 366.664 225.6C357.464 236 345.664 243.2 331.264 247.2C348.464 252 362.064 260.2 372.064 271.8C382.464 283.4 387.664 298 387.664 315.6C387.664 340.4 378.264 360.8 359.464 376.8C340.664 392.8 316.264 400.8 286.264 400.8Z"
-                                fill="currentColor"
-                            />
-                            <path
-                                d="M78.2 167.6H53V105.2H146V400.2H78.2V167.6Z"
-                                fill="currentColor"
-                            />
-                            <path
-                                d="M286.264 400.8C255.464 400.8 230.264 392.4 210.664 375.6C191.464 358.8 181.864 337 181.864 310.2H252.064C252.064 318.2 255.064 324.8 261.064 330C267.064 335.2 275.064 337.8 285.064 337.8C294.664 337.8 302.464 335 308.464 329.4C314.864 323.8 318.064 316.6 318.064 307.8C318.064 299.8 315.264 293.2 309.664 288C304.064 282.8 296.864 280.2 288.064 280.2H250.864V218.4H288.064C294.864 218.4 300.664 216 305.464 211.2C310.264 206.4 312.664 200.4 312.664 193.2C312.664 184.8 310.064 178.2 304.864 173.4C299.664 168.6 293.064 166.2 285.064 166.2C277.864 166.2 271.664 168.4 266.464 172.8C261.664 177.2 259.264 182.8 259.264 189.6H192.664C192.664 164.8 201.464 144.6 219.064 129C236.664 113 259.264 105 286.864 105C314.464 105 336.864 112.2 354.064 126.6C371.664 141 380.464 160 380.464 183.6C380.464 200.8 375.864 214.8 366.664 225.6C357.464 236 345.664 243.2 331.264 247.2C348.464 252 362.064 260.2 372.064 271.8C382.464 283.4 387.664 298 387.664 315.6C387.664 340.4 378.264 360.8 359.464 376.8C340.664 392.8 316.264 400.8 286.264 400.8Z"
-                                stroke="var(--stroke-color)"
-                                stroke-width="2.4"
-                                mask="url(#path-3-mask)"
-                            />
-                            <path
-                                d="M78.2 167.6H53V105.2H146V400.2H78.2V167.6Z"
-                                stroke="var(--stroke-color)"
-                                stroke-width="2.4"
-                                mask="url(#path-3-mask)"
-                            />
-                        </g>
-
-                        <g
-                            class="text-[#F3BEC7] opacity-100 mix-blend-multiply transition-all delay-400 duration-750 dark:text-[#733000] dark:mix-blend-normal starting:opacity-0 motion-safe:starting:-translate-x-[78px]"
-                        >
-                            <mask
-                                id="path-4-mask"
-                                maskUnits="userSpaceOnUse"
-                                x="76.6643"
-                                y="103"
-                                width="338"
-                                height="299"
-                                fill="black"
-                            >
-                                <rect
-                                    fill="white"
-                                    x="76.6643"
-                                    y="103"
-                                    width="338"
-                                    height="299"
-                                />
-                                <path
-                                    d="M311.929 400.8C281.129 400.8 255.929 392.4 236.329 375.6C217.129 358.8 207.529 337 207.529 310.2H277.729C277.729 318.2 280.729 324.8 286.729 330C292.729 335.2 300.729 337.8 310.729 337.8C320.329 337.8 328.129 335 334.129 329.4C340.529 323.8 343.729 316.6 343.729 307.8C343.729 299.8 340.929 293.2 335.329 288C329.729 282.8 322.529 280.2 313.729 280.2H276.529V218.4H313.729C320.529 218.4 326.329 216 331.129 211.2C335.929 206.4 338.329 200.4 338.329 193.2C338.329 184.8 335.729 178.2 330.529 173.4C325.329 168.6 318.729 166.2 310.729 166.2C303.529 166.2 297.329 168.4 292.129 172.8C287.329 177.2 284.929 182.8 284.929 189.6H218.329C218.329 164.8 227.129 144.6 244.729 129C262.329 113 284.929 105 312.529 105C340.129 105 362.529 112.2 379.729 126.6C397.329 141 406.129 160 406.129 183.6C406.129 200.8 401.529 214.8 392.329 225.6C383.129 236 371.329 243.2 356.929 247.2C374.129 252 387.729 260.2 397.729 271.8C408.129 283.4 413.329 298 413.329 315.6C413.329 340.4 403.929 360.8 385.129 376.8C366.329 392.8 341.929 400.8 311.929 400.8Z"
-                                />
-                                <path
-                                    d="M103.864 167.6H78.6643V105.2H171.664V400.2H103.864V167.6Z"
-                                />
-                            </mask>
-                            <path
-                                d="M311.929 400.8C281.129 400.8 255.929 392.4 236.329 375.6C217.129 358.8 207.529 337 207.529 310.2H277.729C277.729 318.2 280.729 324.8 286.729 330C292.729 335.2 300.729 337.8 310.729 337.8C320.329 337.8 328.129 335 334.129 329.4C340.529 323.8 343.729 316.6 343.729 307.8C343.729 299.8 340.929 293.2 335.329 288C329.729 282.8 322.529 280.2 313.729 280.2H276.529V218.4H313.729C320.529 218.4 326.329 216 331.129 211.2C335.929 206.4 338.329 200.4 338.329 193.2C338.329 184.8 335.729 178.2 330.529 173.4C325.329 168.6 318.729 166.2 310.729 166.2C303.529 166.2 297.329 168.4 292.129 172.8C287.329 177.2 284.929 182.8 284.929 189.6H218.329C218.329 164.8 227.129 144.6 244.729 129C262.329 113 284.929 105 312.529 105C340.129 105 362.529 112.2 379.729 126.6C397.329 141 406.129 160 406.129 183.6C406.129 200.8 401.529 214.8 392.329 225.6C383.129 236 371.329 243.2 356.929 247.2C374.129 252 387.729 260.2 397.729 271.8C408.129 283.4 413.329 298 413.329 315.6C413.329 340.4 403.929 360.8 385.129 376.8C366.329 392.8 341.929 400.8 311.929 400.8Z"
-                                fill="currentColor"
-                            />
-                            <path
-                                d="M103.864 167.6H78.6643V105.2H171.664V400.2H103.864V167.6Z"
-                                fill="currentColor"
-                            />
-                            <path
-                                d="M311.929 400.8C281.129 400.8 255.929 392.4 236.329 375.6C217.129 358.8 207.529 337 207.529 310.2H277.729C277.729 318.2 280.729 324.8 286.729 330C292.729 335.2 300.729 337.8 310.729 337.8C320.329 337.8 328.129 335 334.129 329.4C340.529 323.8 343.729 316.6 343.729 307.8C343.729 299.8 340.929 293.2 335.329 288C329.729 282.8 322.529 280.2 313.729 280.2H276.529V218.4H313.729C320.529 218.4 326.329 216 331.129 211.2C335.929 206.4 338.329 200.4 338.329 193.2C338.329 184.8 335.729 178.2 330.529 173.4C325.329 168.6 318.729 166.2 310.729 166.2C303.529 166.2 297.329 168.4 292.129 172.8C287.329 177.2 284.929 182.8 284.929 189.6H218.329C218.329 164.8 227.129 144.6 244.729 129C262.329 113 284.929 105 312.529 105C340.129 105 362.529 112.2 379.729 126.6C397.329 141 406.129 160 406.129 183.6C406.129 200.8 401.529 214.8 392.329 225.6C383.129 236 371.329 243.2 356.929 247.2C374.129 252 387.729 260.2 397.729 271.8C408.129 283.4 413.329 298 413.329 315.6C413.329 340.4 403.929 360.8 385.129 376.8C366.329 392.8 341.929 400.8 311.929 400.8Z"
-                                stroke="var(--stroke-color)"
-                                stroke-width="2.4"
-                                mask="url(#path-4-mask)"
-                            />
-                            <path
-                                d="M103.864 167.6H78.6643V105.2H171.664V400.2H103.864V167.6Z"
-                                stroke="var(--stroke-color)"
-                                stroke-width="2.4"
-                                mask="url(#path-4-mask)"
-                            />
-                        </g>
-
-                        <g
-                            class="text-[#F3BEC7] opacity-100 mix-blend-hard-light transition-all delay-400 duration-750 dark:text-[#4B0600] starting:opacity-0 motion-safe:starting:-translate-x-[102px]"
-                        >
-                            <mask
-                                id="path-5-mask"
-                                maskUnits="userSpaceOnUse"
-                                x="102.329"
-                                y="103"
-                                width="338"
-                                height="299"
-                                fill="black"
-                            >
-                                <rect
-                                    fill="white"
-                                    x="102.329"
-                                    y="103"
-                                    width="338"
-                                    height="299"
-                                />
-                                <path
-                                    d="M337.593 400.8C306.793 400.8 281.593 392.4 261.993 375.6C242.793 358.8 233.193 337 233.193 310.2H303.393C303.393 318.2 306.393 324.8 312.393 330C318.393 335.2 326.393 337.8 336.393 337.8C345.993 337.8 353.793 335 359.793 329.4C366.193 323.8 369.393 316.6 369.393 307.8C369.393 299.8 366.593 293.2 360.993 288C355.393 282.8 348.193 280.2 339.393 280.2H302.193V218.4H339.393C346.193 218.4 351.993 216 356.793 211.2C361.593 206.4 363.993 200.4 363.993 193.2C363.993 184.8 361.393 178.2 356.193 173.4C350.993 168.6 344.393 166.2 336.393 166.2C329.193 166.2 322.993 168.4 317.793 172.8C312.993 177.2 310.593 182.8 310.593 189.6H243.993C243.993 164.8 252.793 144.6 270.393 129C287.993 113 310.593 105 338.193 105C365.793 105 388.193 112.2 405.393 126.6C422.993 141 431.793 160 431.793 183.6C431.793 200.8 427.193 214.8 417.993 225.6C408.793 236 396.993 243.2 382.593 247.2C399.793 252 413.393 260.2 423.393 271.8C433.793 283.4 438.993 298 438.993 315.6C438.993 340.4 429.593 360.8 410.793 376.8C391.993 392.8 367.593 400.8 337.593 400.8Z"
-                                />
-                                <path
-                                    d="M129.529 167.6H104.329V105.2H197.329V400.2H129.529V167.6Z"
-                                />
-                            </mask>
-                            <path
-                                d="M337.593 400.8C306.793 400.8 281.593 392.4 261.993 375.6C242.793 358.8 233.193 337 233.193 310.2H303.393C303.393 318.2 306.393 324.8 312.393 330C318.393 335.2 326.393 337.8 336.393 337.8C345.993 337.8 353.793 335 359.793 329.4C366.193 323.8 369.393 316.6 369.393 307.8C369.393 299.8 366.593 293.2 360.993 288C355.393 282.8 348.193 280.2 339.393 280.2H302.193V218.4H339.393C346.193 218.4 351.993 216 356.793 211.2C361.593 206.4 363.993 200.4 363.993 193.2C363.993 184.8 361.393 178.2 356.193 173.4C350.993 168.6 344.393 166.2 336.393 166.2C329.193 166.2 322.993 168.4 317.793 172.8C312.993 177.2 310.593 182.8 310.593 189.6H243.993C243.993 164.8 252.793 144.6 270.393 129C287.993 113 310.593 105 338.193 105C365.793 105 388.193 112.2 405.393 126.6C422.993 141 431.793 160 431.793 183.6C431.793 200.8 427.193 214.8 417.993 225.6C408.793 236 396.993 243.2 382.593 247.2C399.793 252 413.393 260.2 423.393 271.8C433.793 283.4 438.993 298 438.993 315.6C438.993 340.4 429.593 360.8 410.793 376.8C391.993 392.8 367.593 400.8 337.593 400.8Z"
-                                fill="currentColor"
-                            />
-                            <path
-                                d="M129.529 167.6H104.329V105.2H197.329V400.2H129.529V167.6Z"
-                                fill="currentColor"
-                            />
-                            <path
-                                d="M337.593 400.8C306.793 400.8 281.593 392.4 261.993 375.6C242.793 358.8 233.193 337 233.193 310.2H303.393C303.393 318.2 306.393 324.8 312.393 330C318.393 335.2 326.393 337.8 336.393 337.8C345.993 337.8 353.793 335 359.793 329.4C366.193 323.8 369.393 316.6 369.393 307.8C369.393 299.8 366.593 293.2 360.993 288C355.393 282.8 348.193 280.2 339.393 280.2H302.193V218.4H339.393C346.193 218.4 351.993 216 356.793 211.2C361.593 206.4 363.993 200.4 363.993 193.2C363.993 184.8 361.393 178.2 356.193 173.4C350.993 168.6 344.393 166.2 336.393 166.2C329.193 166.2 322.993 168.4 317.793 172.8C312.993 177.2 310.593 182.8 310.593 189.6H243.993C243.993 164.8 252.793 144.6 270.393 129C287.993 113 310.593 105 338.193 105C365.793 105 388.193 112.2 405.393 126.6C422.993 141 431.793 160 431.793 183.6C431.793 200.8 427.193 214.8 417.993 225.6C408.793 236 396.993 243.2 382.593 247.2C399.793 252 413.393 260.2 423.393 271.8C433.793 283.4 438.993 298 438.993 315.6C438.993 340.4 429.593 360.8 410.793 376.8C391.993 392.8 367.593 400.8 337.593 400.8Z"
-                                stroke="var(--stroke-color)"
-                                stroke-width="2.4"
-                                mask="url(#path-5-mask)"
-                            />
-                            <path
-                                d="M129.529 167.6H104.329V105.2H197.329V400.2H129.529V167.6Z"
-                                stroke="var(--stroke-color)"
-                                stroke-width="2.4"
-                                mask="url(#path-5-mask)"
-                            />
-                        </g>
-                    </svg>
-                    <div
-                        class="absolute inset-0 rounded-t-lg shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] lg:rounded-t-none lg:rounded-r-lg dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]"
-                    ></div>
+        <!-- AI Assistant Banner Showcase Section -->
+        <section class="max-w-7xl mx-auto px-4 pb-16 md:px-8">
+            <Motion 
+                tag="div"
+                :hover="{ scale: 1.01 }"
+                :transition="{ type: 'spring', stiffness: 180, damping: 15 }"
+                class="relative overflow-hidden rounded-[24px] border border-neutral-200/40 dark:border-neutral-800/40 bg-gradient-to-r from-primary/5 via-amber-500/5 to-primary/5 p-8 md:p-12 text-center space-y-6 cursor-pointer"
+            >
+                <!-- Background visual decor -->
+                <div class="absolute -top-12 -left-12 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-12 -right-12 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-neutral-800 border border-neutral-200/60 dark:border-neutral-700/60 text-[11px] font-bold text-neutral-600 dark:text-neutral-300">
+                    🤖 INTEGRASI KECERDASAN BUATAN (AI)
                 </div>
-            </main>
-        </div>
-        <div class="hidden h-14.5 lg:block"></div>
+                
+                <h3 class="text-2xl md:text-3xl font-bold max-w-2xl mx-auto leading-snug">
+                    Dapatkan Analisis Finansial Instan dari Asisten AI Cerdas Anda
+                </h3>
+                
+                <p class="text-sm text-neutral-500 dark:text-neutral-400 max-w-xl mx-auto">
+                    Kini pengurus yayasan dapat berkonsultasi mengenai kondisi keuangan, melihat prediksi tunggakan SPP, serta membuat format laporan bulanan secara otomatis dengan bahasa natural.
+                </p>
+
+                <div class="pt-2">
+                    <span class="inline-block px-4 py-2 text-xs font-semibold text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
+                        Mendukung Analisis Deskriptif, Diagnostik, dan Prediktif Keuangan
+                    </span>
+                </div>
+            </Motion>
+        </section>
+
+        <!-- Minimalist Tahoe Footer -->
+        <footer class="border-t border-neutral-200/50 dark:border-neutral-800/50 bg-white/40 dark:bg-[#121214]/40 backdrop-blur-md">
+            <div class="max-w-7xl mx-auto px-4 py-12 md:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+                
+                <div class="flex items-center gap-3">
+                    <div class="flex aspect-square size-7 items-center justify-center rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 overflow-hidden font-bold text-xs select-none">
+                        Y
+                    </div>
+                    <span class="text-xs font-semibold tracking-wider text-neutral-500 dark:text-neutral-400 uppercase">
+                        {{ appName }} &copy; {{ new Date().getFullYear() }} All Rights Reserved.
+                    </span>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-neutral-500 dark:text-neutral-400 font-medium">
+                    <a href="https://laravel.com" target="_blank" class="hover:text-primary transition-colors">Laravel Scaffolding</a>
+                    <span class="text-neutral-300 dark:text-neutral-800">&bull;</span>
+                    <a href="https://inertiajs.com" target="_blank" class="hover:text-primary transition-colors">Inertia.js</a>
+                    <span class="text-neutral-300 dark:text-neutral-800">&bull;</span>
+                    <a href="https://tailwindcss.com" target="_blank" class="hover:text-primary transition-colors">Tailwind CSS v4</a>
+                </div>
+
+            </div>
+        </footer>
+
     </div>
 </template>
+
+<style scoped>
+/* Subtle custom styling override for smooth scroll animation behavior */
+html {
+    scroll-behavior: smooth;
+}
+</style>
