@@ -39,9 +39,9 @@ const recentTransactions = [
     {
         id: 1,
         student: 'Aisyah Putri',
-        grade: 'SD IT - Kelas 3A',
+        grade: 'MI IT - Kelas 3A',
         type: 'SPP Mei 2026',
-        amount: 500000,
+        amount: 250000,
         time: '2 menit yang lalu',
         initials: 'AP',
         bgColor: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
@@ -51,7 +51,7 @@ const recentTransactions = [
         student: 'Rizky Ramadhan',
         grade: 'SMP IT - Kelas 8B',
         type: 'SPP Mei + Uang Kegiatan',
-        amount: 1450000,
+        amount: 550000,
         time: '15 menit yang lalu',
         initials: 'RR',
         bgColor: 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
@@ -59,9 +59,9 @@ const recentTransactions = [
     {
         id: 3,
         student: 'Amanda Kartika',
-        grade: 'SMA Unggulan - Kelas 12C',
-        type: 'Uang Pembangunan (Cicilan)',
-        amount: 1500000,
+        grade: 'MI IT - Kelas 6B',
+        type: 'SPP Mei 2026',
+        amount: 250000,
         time: '1 jam yang lalu',
         initials: 'AK',
         bgColor: 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
@@ -69,9 +69,9 @@ const recentTransactions = [
     {
         id: 4,
         student: 'Fahri Hamzah',
-        grade: 'TK Islam - A2',
+        grade: 'SMP IT - Kelas 9A',
         type: 'SPP Mei 2026',
-        amount: 350000,
+        amount: 300000,
         time: '2 jam yang lalu',
         initials: 'FH',
         bgColor: 'bg-purple-500/10 text-purple-600 dark:text-purple-400'
@@ -104,6 +104,12 @@ const scrollToPreview = () => {
 
     <div class="relative min-h-screen bg-neutral-50 text-neutral-900 transition-colors duration-300 dark:bg-[#09090b] dark:text-neutral-100 overflow-x-hidden font-sans selection:bg-primary/20 selection:text-primary">
         
+        <!-- Strict Private Access & Non-Commercial Notice Banner -->
+        <div class="relative z-50 bg-amber-500/10 dark:bg-amber-500/5 border-b border-amber-500/20 px-4 py-2.5 text-center text-xs text-amber-750 dark:text-amber-400 font-semibold tracking-wide flex items-center justify-center gap-2 select-none">
+            <span class="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
+            🔐 SISTEM INTERNAL PRIVAT &bull; KHUSUS PENGGUNAAN PRIBADI YAYASAN DARUL HALIM MADANI &bull; TIDAK UNTUK DIJUAL / NON-KOMERSIAL
+        </div>
+
         <!-- Elegant Background Glow Orbs -->
         <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-primary/10 blur-[120px] pointer-events-none dark:bg-primary/5"></div>
         <div class="absolute top-[40%] right-[-10%] w-[600px] h-[600px] rounded-full bg-amber-500/10 blur-[130px] pointer-events-none dark:bg-amber-500/5"></div>
@@ -152,23 +158,14 @@ const scrollToPreview = () => {
                     >
                         Masuk Dashboard
                     </Link>
-                    <template v-else>
-                        <Link
-                            id="btn-login"
-                            :href="login()"
-                            class="px-4 py-2 text-xs font-medium text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-neutral-100 transition-colors"
-                        >
-                            Log in
-                        </Link>
-                        <Link
-                            v-if="canRegister"
-                            id="btn-register"
-                            :href="register()"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-primary hover:bg-primary/90 dark:text-neutral-900 dark:bg-white dark:hover:bg-neutral-100 rounded-full transition-all shadow-md active:scale-95"
-                        >
-                            Daftar
-                        </Link>
-                    </template>
+                    <Link
+                        v-else
+                        id="btn-login"
+                        :href="login()"
+                        class="px-5 py-2 text-xs font-semibold text-white bg-primary hover:bg-primary/95 dark:text-neutral-900 dark:bg-white dark:hover:bg-neutral-100 rounded-full transition-all shadow-md active:scale-95"
+                    >
+                        Masuk Portal
+                    </Link>
                 </div>
             </nav>
         </header>
@@ -185,10 +182,10 @@ const scrollToPreview = () => {
                         :initial="{ opacity: 0, y: -12 }"
                         :animate="{ opacity: 1, y: 0 }"
                         :transition="{ duration: 0.6, easing: [0.16, 1, 0.3, 1] }"
-                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-semibold tracking-wide uppercase"
+                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-600 dark:text-amber-400 text-xs font-semibold tracking-wide uppercase"
                     >
-                        <span class="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
-                        Dashboard Keuangan Yayasan Pintar
+                        <span class="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
+                        Aplikasi Penggunaan Pribadi (Non-Komersial)
                     </Motion>
                     
                     <Motion 
@@ -198,9 +195,9 @@ const scrollToPreview = () => {
                         :transition="{ delay: 0.12, duration: 0.75, easing: [0.16, 1, 0.3, 1] }"
                         class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight"
                     >
-                        Administrasi SPP & Keuangan
+                        Tata Kelola SPP & Keuangan
                         <span class="bg-gradient-to-r from-primary to-amber-500 bg-clip-text text-transparent block mt-1">
-                            Modern & Transparan
+                            YPD Darul Halim Madani
                         </span>
                     </Motion>
                     
@@ -211,7 +208,7 @@ const scrollToPreview = () => {
                         :transition="{ delay: 0.22, duration: 0.75, easing: [0.16, 1, 0.3, 1] }"
                         class="text-neutral-600 dark:text-neutral-400 text-lg leading-relaxed max-w-xl"
                     >
-                        Satu platform inovatif untuk mengotomatisasi tagihan rutin SPP bulanan, pencatatan kas terpusat, dan pelaporan keuangan real-time terintegrasi untuk seluruh unit TK, SD, SMP, & SMA di bawah satu yayasan.
+                        Sistem informasi keuangan internal yang dikonfigurasi secara mandiri (Self-Hosted) untuk pengelolaan dana pendidikan, pencatatan transaksi SPP, serta pelaporan kas unit MI dan SMP Terpadu di bawah naungan Yayasan.
                     </Motion>
 
                     <!-- Interactive Buttons with Spring Transitions -->
@@ -222,24 +219,12 @@ const scrollToPreview = () => {
                         :transition="{ delay: 0.32, duration: 0.75, easing: [0.16, 1, 0.3, 1] }"
                         class="flex flex-col sm:flex-row gap-4 pt-2"
                     >
-                        <button
-                            id="hero-cta-preview"
-                            @click="scrollToPreview"
-                            class="flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all hover:translate-y-[-2px] active:translate-y-[0]"
-                        >
-                            <svg class="w-4 h-4 fill-none stroke-current" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                            Lihat Preview Dashboard
-                        </button>
-                        
                         <Link
                             v-if="!$page.props.auth.user"
                             :href="login()"
-                            class="flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/50 hover:bg-white dark:bg-neutral-900/50 dark:hover:bg-neutral-900 transition-all hover:translate-y-[-2px] active:translate-y-[0]"
+                            class="flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all hover:translate-y-[-2px] active:translate-y-[0]"
                         >
-                            Masuk ke Portal
+                            Masuk ke Portal Keuangan
                             <svg class="w-4 h-4 stroke-current fill-none" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                             </svg>
@@ -247,13 +232,25 @@ const scrollToPreview = () => {
                         <Link
                             v-else
                             :href="dashboardUrl"
-                            class="flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/50 hover:bg-white dark:bg-neutral-900/50 dark:hover:bg-neutral-900 transition-all hover:translate-y-[-2px] active:translate-y-[0]"
+                            class="flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all hover:translate-y-[-2px] active:translate-y-[0]"
                         >
-                            Buka Dashboard
+                            Buka Dashboard Utama
                             <svg class="w-4 h-4 stroke-current fill-none" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                             </svg>
                         </Link>
+
+                        <button
+                            id="hero-cta-preview"
+                            @click="scrollToPreview"
+                            class="flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/50 hover:bg-white dark:bg-neutral-900/50 dark:hover:bg-neutral-900 transition-all hover:translate-y-[-2px] active:translate-y-[0]"
+                        >
+                            <svg class="w-4 h-4 fill-none stroke-current" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            Lihat Ringkasan Sistem
+                        </button>
                     </Motion>
 
                     <!-- Micro-facts grid -->
@@ -265,16 +262,16 @@ const scrollToPreview = () => {
                         class="grid grid-cols-3 gap-4 pt-6 border-t border-neutral-200/50 dark:border-neutral-800/50 max-w-md"
                     >
                         <div>
-                            <p class="text-2xl font-bold text-primary">100%</p>
-                            <p class="text-xs text-neutral-500 dark:text-neutral-500">Transparan & Real-Time</p>
+                            <p class="text-2xl font-bold text-primary">2 Unit</p>
+                            <p class="text-xs text-neutral-500 dark:text-neutral-500">Instansi (MI & SMP)</p>
                         </div>
                         <div>
-                            <p class="text-2xl font-bold text-amber-500">4 Unit</p>
-                            <p class="text-xs text-neutral-500 dark:text-neutral-500">Lembaga Terintegrasi</p>
+                            <p class="text-2xl font-bold text-amber-500">Terenkripsi</p>
+                            <p class="text-xs text-neutral-500 dark:text-neutral-500">Keamanan Akses</p>
                         </div>
                         <div>
-                            <p class="text-2xl font-bold text-emerald-500">10x</p>
-                            <p class="text-xs text-neutral-500 dark:text-neutral-500">Lebih Efisien & Cepat</p>
+                            <p class="text-2xl font-bold text-emerald-500">Sentral</p>
+                            <p class="text-xs text-neutral-500 dark:text-neutral-500">Database Real-Time</p>
                         </div>
                     </Motion>
                 </div>
@@ -532,9 +529,9 @@ const scrollToPreview = () => {
                             <div class="pt-3 border-t border-neutral-200/30 flex items-center justify-between text-[9px] text-neutral-400 dark:text-neutral-500 font-bold uppercase tracking-wider mt-4">
                                 <span class="flex items-center gap-1">
                                     <span class="h-1.5 w-1.5 rounded-full bg-primary block"></span>
-                                    Lembaga Aktif: 4 Unit
+                                    Instansi Aktif: 2 Unit
                                 </span>
-                                <span>SSL Encrypted &bull; ISO 27001 Secured</span>
+                                <span>Akses Terenkripsi &bull; Database Internal</span>
                             </div>
                         </div>
 
@@ -548,10 +545,10 @@ const scrollToPreview = () => {
         <section class="max-w-7xl mx-auto px-4 py-16 md:px-8 border-t border-neutral-200/50 dark:border-neutral-800/50">
             <div class="text-center space-y-4 mb-16">
                 <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight">
-                    Mengapa Memilih Platform Kami?
+                    Fokus Sistem Mandiri & Pribadi
                 </h2>
                 <p class="text-neutral-500 dark:text-neutral-400 max-w-xl mx-auto">
-                    Kemudahan tata kelola administrasi dana pendidikan terstruktur secara aman bagi bendahara sekolah, admin yayasan, dan orang tua.
+                    Seluruh fitur dalam aplikasi ini dibangun secara khusus untuk kebutuhan tata kelola operasional internal yayasan tanpa adanya fungsi komersial.
                 </p>
             </div>
 
@@ -569,9 +566,9 @@ const scrollToPreview = () => {
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-neutral-800 dark:text-neutral-100">Manajemen Multi-Lembaga</h3>
+                    <h3 class="text-lg font-bold text-neutral-800 dark:text-neutral-100">Integrasi MI & SMP Terpadu</h3>
                     <p class="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">
-                        Kelola data keuangan seluruh unit sekolah (TK, SD, SMP, SMA) secara sentralisasi dalam satu dashboard terpadu tanpa berpindah portal.
+                        Penyatuan seluruh data operasional keuangan dan data siswa unit MI dan SMP secara sentralisasi dalam satu database dan panel kontrol terpadu.
                     </p>
                 </Motion>
 
@@ -587,9 +584,9 @@ const scrollToPreview = () => {
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-neutral-800 dark:text-neutral-100">Tagihan SPP Otomatis</h3>
+                    <h3 class="text-lg font-bold text-neutral-800 dark:text-neutral-100">Pencatatan SPP Otomatis</h3>
                     <p class="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">
-                        Generate lembar tagihan rutin SPP bulanan siswa secara massal sesuai kriteria unit pendidikan, angkatan akademik, dan jenis program kelas.
+                        Pembuatan invoice tagihan bulanan siswa secara massal sesuai kriteria unit pendidikan, angkatan, serta pembebasan biaya bagi siswa kota Tangerang yang berhak.
                     </p>
                 </Motion>
 
@@ -605,9 +602,9 @@ const scrollToPreview = () => {
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-neutral-800 dark:text-neutral-100">Laporan Keuangan & AI</h3>
+                    <h3 class="text-lg font-bold text-neutral-800 dark:text-neutral-100">Asisten AI Finansial Terintegrasi</h3>
                     <p class="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">
-                        Pantau sirkulasi dana secara real-time dan analisis tren pendapatan menggunakan asisten kecerdasan buatan (AI) terintegrasi pada dashboard Anda.
+                        Konsultasi real-time sirkulasi saldo kas dan estimasi piutang menggunakan asisten kecerdasan buatan berbasis model Gemini 2.5 Flash yang beroperasi di lingkungan secure.
                     </p>
                 </Motion>
             </div>
@@ -626,20 +623,20 @@ const scrollToPreview = () => {
                 <div class="absolute -bottom-12 -right-12 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
                 
                 <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-neutral-800 border border-neutral-200/60 dark:border-neutral-700/60 text-[11px] font-bold text-neutral-600 dark:text-neutral-300">
-                    🤖 INTEGRASI KECERDASAN BUATAN (AI)
+                    🤖 INTEGRASI ASISTEN AI MANDIRI
                 </div>
                 
                 <h3 class="text-2xl md:text-3xl font-bold max-w-2xl mx-auto leading-snug">
-                    Dapatkan Analisis Finansial Instan dari Asisten AI Cerdas Anda
+                    Analisis Keuangan Instan dengan Gemini 2.5 Flash
                 </h3>
                 
                 <p class="text-sm text-neutral-500 dark:text-neutral-400 max-w-xl mx-auto">
-                    Kini pengurus yayasan dapat berkonsultasi mengenai kondisi keuangan, melihat prediksi tunggakan SPP, serta membuat format laporan bulanan secara otomatis dengan bahasa natural.
+                    Sistem ini mengintegrasikan teknologi AI Generatif secara langsung menggunakan API key pribadi yayasan. Dirancang aman tanpa adanya pelacakan eksternal untuk membantu pimpinan mengolah kesimpulan laporan bulanan.
                 </p>
 
                 <div class="pt-2">
                     <span class="inline-block px-4 py-2 text-xs font-semibold text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
-                        Mendukung Analisis Deskriptif, Diagnostik, dan Prediktif Keuangan
+                        Pemrosesan Data Keuangan Aman &bull; Server Side Integration
                     </span>
                 </div>
             </Motion>
@@ -659,11 +656,11 @@ const scrollToPreview = () => {
                 </div>
 
                 <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-neutral-500 dark:text-neutral-400 font-medium">
-                    <a href="https://laravel.com" target="_blank" class="hover:text-primary transition-colors">Laravel Scaffolding</a>
+                    <span>Yayasan Pendidikan Darul Halim Madani</span>
                     <span class="text-neutral-300 dark:text-neutral-800">&bull;</span>
-                    <a href="https://inertiajs.com" target="_blank" class="hover:text-primary transition-colors">Inertia.js</a>
+                    <span class="text-amber-600 dark:text-amber-400 font-semibold">Penggunaan Pribadi (Tidak untuk Dijual)</span>
                     <span class="text-neutral-300 dark:text-neutral-800">&bull;</span>
-                    <a href="https://tailwindcss.com" target="_blank" class="hover:text-primary transition-colors">Tailwind CSS v4</a>
+                    <span>v1.0.0-Private</span>
                 </div>
 
             </div>
