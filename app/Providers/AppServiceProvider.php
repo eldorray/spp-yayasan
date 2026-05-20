@@ -24,6 +24,15 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        // Load settings from database dynamically
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
+                config(['app.name' => \App\Models\Setting::get('app_name', config('app.name'))]);
+            }
+        } catch (\Exception $e) {
+            // Silence database exceptions during initialization/console runs
+        }
     }
 
     /**

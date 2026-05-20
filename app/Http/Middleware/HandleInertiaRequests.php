@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\AcademicYear;
 use App\Models\Menu;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -41,6 +42,12 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'appSettings' => [
+                'name' => \App\Models\Setting::get('app_name', config('app.name')),
+                'logo' => \App\Models\Setting::get('app_logo') ? asset('storage/' . \App\Models\Setting::get('app_logo')) : null,
+                'favicon' => \App\Models\Setting::get('app_favicon') ? asset('storage/' . \App\Models\Setting::get('app_favicon')) : null,
+                'theme' => \App\Models\Setting::get('app_theme', 'tahoe-slate'),
+            ],
             'auth' => [
                 'user' => $user,
                 'isAdmin' => fn () => $user?->hasRole('super-admin') ?? false,
@@ -49,6 +56,11 @@ class HandleInertiaRequests extends Middleware
             'currentTeam' => fn () => $user?->currentTeam ? $user->toUserTeam($user->currentTeam) : null,
             'teams' => fn () => $user?->toUserTeams(includeCurrent: true) ?? [],
             'navigation' => fn () => $this->getNavigationMenus($user),
+            'activeAcademicYear' => fn () => AcademicYear::getActive(),
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
         ];
     }
 

@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+    'sync_api' => [
+        'base_url' => env('SYNC_API_BASE_URL', 'https://datainduk.ypdhalmadani.sch.id'),
+    ],
+
+    'deepseek' => [
+        'api_key' => env('DEEPSEEK_API_KEY'),
+        'model' => env('DEEPSEEK_MODEL', 'deepseek-v4-flash'),
+        'base_url' => env('DEEPSEEK_BASE_URL', 'https://api.deepseek.com'),
+    ],
+
 ];

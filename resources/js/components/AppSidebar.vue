@@ -3,6 +3,7 @@ import { Link, usePage } from '@inertiajs/vue3';
 import {
     BookOpen,
     Circle,
+    CreditCard,
     FolderGit2,
     LayoutGrid,
     Shield,
@@ -28,9 +29,7 @@ import type { NavItem } from '@/types';
 
 const page = usePage();
 
-const dashboardUrl = computed(() =>
-    page.props.currentTeam ? dashboard(page.props.currentTeam.slug).url : '/',
-);
+const dashboardUrl = computed(() => '/dashboard');
 
 /**
  * Resolve a Lucide icon name string to the actual component.
@@ -44,14 +43,15 @@ const mainNavItems = computed<NavItem[]>(() => {
     const items: NavItem[] = [
         {
             title: 'Dashboard',
-            href: dashboardUrl.value,
+            href: '/dashboard',
             icon: LayoutGrid,
         },
     ];
 
-    // Dynamic menus from database
+    // Dynamic menus from database (exclude Pembayaran, it's a separate button)
     const navigation = page.props.navigation ?? [];
     for (const menu of navigation) {
+        if (menu.url === '/payments') continue;
         items.push({
             title: menu.title,
             href: menu.url,
@@ -72,16 +72,7 @@ const mainNavItems = computed<NavItem[]>(() => {
 });
 
 const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
-    },
+    
 ];
 </script>
 
@@ -91,7 +82,7 @@ const footerNavItems: NavItem[] = [
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboardUrl">
+                        <Link href="/dashboard">
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>
@@ -105,6 +96,17 @@ const footerNavItems: NavItem[] = [
         </SidebarHeader>
 
         <SidebarContent>
+            <!-- Prominent Payment Button -->
+            <div class="px-3 pt-2 pb-1 group-data-[collapsible=icon]:px-1">
+                <Link
+                    href="/payments"
+                    class="flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2"
+                >
+                    <CreditCard class="h-4 w-4 shrink-0" />
+                    <span class="group-data-[collapsible=icon]:hidden">Pembayaran</span>
+                </Link>
+            </div>
+
             <NavMain :items="mainNavItems" />
         </SidebarContent>
 

@@ -49,10 +49,10 @@ class RolePermissionSeeder extends Seeder
             'roles.view',
         ]);
 
-        // Assign super-admin to first user if exists
-        $firstUser = User::first();
-        if ($firstUser) {
-            $firstUser->assignRole('super-admin');
-        }
+        // Create tata-usaha role
+        $tataUsaha = Role::firstOrCreate(['name' => 'tata-usaha']);
+        $tataUsaha->syncPermissions([
+            'users.view',
+        ]);
     }
 }

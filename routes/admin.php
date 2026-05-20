@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AppSettingController;
 use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
@@ -41,4 +42,8 @@ Route::middleware(['auth', 'verified', EnsureUserIsAdmin::class])
         Route::patch('menus/{menu}', [MenuController::class, 'update'])->name('menus.update');
         Route::delete('menus/{menu}', [MenuController::class, 'destroy'])->name('menus.destroy');
         Route::post('menus/reorder', [MenuController::class, 'reorder'])->name('menus.reorder');
+
+        // Settings
+        Route::get('settings', [AppSettingController::class, 'edit'])->name('settings.edit');
+        Route::post('settings', [AppSettingController::class, 'update'])->name('settings.update');
     });

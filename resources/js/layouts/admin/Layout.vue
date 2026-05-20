@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { KeyRound, Menu, Shield, Users } from 'lucide-vue-next';
+import { KeyRound, Menu, Shield, Users, Sliders } from 'lucide-vue-next';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import type { NavItem } from '@/types';
 
@@ -28,6 +28,11 @@ const sidebarNavItems: AdminNavItem[] = [
         title: 'Menus',
         href: '/admin/menus',
         icon: Menu,
+    },
+    {
+        title: 'App Settings',
+        href: '/admin/settings',
+        icon: Sliders,
     },
 ];
 

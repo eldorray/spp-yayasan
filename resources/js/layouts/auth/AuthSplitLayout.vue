@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import { home } from '@/routes';
-
-const page = usePage();
-const name = page.props.name;
 
 defineProps<{
     title?: string;
     description?: string;
 }>();
+
+const page = usePage();
+const appSettings = computed(() => page.props.appSettings as { name: string; logo: string | null } | undefined);
+const appName = computed(() => appSettings.value?.name || page.props.name || 'Laravel');
+const appLogo = computed(() => appSettings.value?.logo || null);
 </script>
 
 <template>
@@ -22,12 +25,14 @@ defineProps<{
             <div class="absolute inset-0 bg-zinc-900" />
             <Link
                 :href="home()"
-                class="relative z-20 flex items-center text-lg font-medium"
+                class="relative z-20 flex items-center text-lg font-medium gap-2"
             >
-                <AppLogoIcon class="mr-2 size-8 fill-current text-white" />
-                {{ name }}
+                <div class="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden bg-white/10 border border-white/10">
+                    <img v-if="appLogo" :src="appLogo" alt="Logo" class="size-full object-cover" />
+                    <AppLogoIcon v-else class="size-6 fill-current text-white" />
+                </div>
+                {{ appName }}
             </Link>
-        </div>
         <div class="lg:p-8">
             <div
                 class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]"
