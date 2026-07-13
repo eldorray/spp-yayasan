@@ -10,7 +10,6 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\Teams\TeamInvitationController;
-use App\Http\Middleware\EnsureTeamMembership;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
@@ -44,6 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Students
     Route::get('students', [StudentController::class, 'index'])->name('students.index');
+    Route::get('students/{student}', [StudentController::class, 'show'])->name('students.show');
     Route::post('students', [StudentController::class, 'store'])->name('students.store');
     Route::patch('students/{student}', [StudentController::class, 'update'])->name('students.update');
     Route::delete('students/{student}', [StudentController::class, 'destroy'])->name('students.destroy');
@@ -83,7 +83,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('invitations/{invitation}/accept', [TeamInvitationController::class, 'accept'])->name('invitations.accept');
 });
-
 
 require __DIR__.'/settings.php';
 require __DIR__.'/admin.php';

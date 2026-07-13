@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { Plus, RefreshCw, Search, Pencil, Trash2, Users } from 'lucide-vue-next';
+import { Plus, RefreshCw, Search, Eye, Pencil, Trash2, Users } from 'lucide-vue-next';
 import { ref, computed, watch } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
 import { Badge } from '@/components/ui/badge';
@@ -520,6 +520,12 @@ function domicileLabel(domicile: string): string {
                             </TableCell>
                             <TableCell>
                                 <div class="flex items-center gap-1">
+                                    <Link
+                                        :href="`/students/${student.id}`"
+                                        class="inline-flex h-8 w-8 items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-muted"
+                                    >
+                                        <Eye class="h-4 w-4" />
+                                    </Link>
                                     <Button
                                         variant="ghost"
                                         size="icon"

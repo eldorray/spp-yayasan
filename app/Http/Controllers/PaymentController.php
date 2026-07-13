@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\AcademicYear;
 use App\Models\ActivityBill;
-use App\Models\Institution;
 use App\Models\MonthlyBill;
 use App\Models\Payment;
 use App\Models\Student;
@@ -120,34 +119,35 @@ class PaymentController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $activeYear = AcademicYear::getActive();
-
-        // Get the bill
+        // Get the bill and its academic year (from the bill itself, so paying a
+        // prior-year bill is recorded under the correct year, not the active one).
         if ($validated['bill_type'] === 'monthly') {
             $bill = MonthlyBill::findOrFail($validated['bill_id']);
             $billableType = MonthlyBill::class;
+            $academicYearId = $bill->academic_year_id;
         } else {
-            $bill = ActivityBill::findOrFail($validated['bill_id']);
+            $bill = ActivityBill::with('activity')->findOrFail($validated['bill_id']);
             $billableType = ActivityBill::class;
+            $academicYearId = $bill->activity->academic_year_id;
         }
 
         // Validate amount doesn't exceed remaining
         $remaining = $bill->amount - $bill->paid_amount;
         if ($validated['amount'] > $remaining) {
-            return back()->withErrors(['amount' => 'Jumlah pembayaran melebihi sisa tagihan (Rp ' . number_format($remaining, 0, ',', '.') . ').']);
+            return back()->withErrors(['amount' => 'Jumlah pembayaran melebihi sisa tagihan (Rp '.number_format($remaining, 0, ',', '.').').']);
         }
 
         // Create payment
         $payment = Payment::create([
             'transaction_number' => Payment::generateTransactionNumber(),
             'student_id' => $validated['student_id'],
-            'academic_year_id' => $activeYear->id,
+            'academic_year_id' => $academicYearId,
             'billable_type' => $billableType,
             'billable_id' => $bill->id,
             'amount' => $validated['amount'],
             'payment_method' => $validated['payment_method'],
             'payment_date' => $validated['payment_date'],
-            'notes' => $validated['notes'],
+            'notes' => $validated['notes'] ?? null,
             'status' => 'valid',
             'created_by' => auth()->id(),
         ]);
@@ -156,7 +156,14 @@ class PaymentController extends Controller
         $bill->paid_amount += $validated['amount'];
         $bill->updateStatus();
 
-        return redirect()->route('payments.index')->with('success', 'Pembayaran berhasil dicatat. No. Transaksi: ' . $payment->transaction_number);
+        $message = 'Pembayaran berhasil dicatat. No. Transaksi: '.$payment->transaction_number;
+
+        // Stay on the referring page (e.g. student detail) instead of the payments list.
+        if ($request->boolean('stay')) {
+            return back()->with('success', $message);
+        }
+
+        return redirect()->route('payments.index')->with('success', $message);
     }
 
     public function show(Payment $payment)

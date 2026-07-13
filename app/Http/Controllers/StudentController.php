@@ -52,6 +52,29 @@ class StudentController extends Controller
         ]);
     }
 
+    public function show(Student $student)
+    {
+        $student->load([
+            'institution',
+            'placements.classroom',
+            'placements.academicYear',
+            'monthlyBills.academicYear',
+            'monthlyBills.payments' => fn ($q) => $q->where('status', 'valid')->latest('id'),
+            'activityBills.activity',
+            'activityBills.payments' => fn ($q) => $q->where('status', 'valid')->latest('id'),
+        ]);
+
+        return Inertia::render('students/Show', [
+            'student' => $student,
+            'monthlyBills' => $student->monthlyBills
+                ->sortBy([['academic_year_id', 'desc'], ['month', 'asc']])
+                ->values(),
+            'activityBills' => $student->activityBills
+                ->sortByDesc(fn ($b) => $b->activity?->activity_date)
+                ->values(),
+        ]);
+    }
+
     public function create()
     {
         return Inertia::render('students/Create', [
@@ -84,7 +107,7 @@ class StudentController extends Controller
         ]);
 
         // Place student in classroom if provided
-        if (!empty($validated['classroom_id'])) {
+        if (! empty($validated['classroom_id'])) {
             $activeYear = AcademicYear::getActive();
             if ($activeYear) {
                 StudentPlacement::create([
@@ -116,8 +139,8 @@ class StudentController extends Controller
     {
         $validated = $request->validate([
             'institution_id' => 'required|exists:institutions,id',
-            'nis' => 'required|string|unique:students,nis,' . $student->id,
-            'nisn' => 'nullable|string|unique:students,nisn,' . $student->id,
+            'nis' => 'required|string|unique:students,nis,'.$student->id,
+            'nisn' => 'nullable|string|unique:students,nisn,'.$student->id,
             'name' => 'required|string|max:255',
             'domicile' => 'required|in:kota_tangerang,luar_kota_tangerang',
             'is_active' => 'boolean',
@@ -167,10 +190,10 @@ class StudentController extends Controller
             'source' => 'required|in:siswa-mi,siswa-smp',
         ]);
 
-        $service = new StudentSyncService();
+        $service = new StudentSyncService;
         $result = $service->sync($validated['source']);
 
-        if (!empty($result['errors']) && $result['created'] === 0 && $result['updated'] === 0) {
+        if (! empty($result['errors']) && $result['created'] === 0 && $result['updated'] === 0) {
             return back()->withErrors(['sync' => $result['errors'][0]]);
         }
 

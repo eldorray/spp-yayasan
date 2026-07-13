@@ -10,13 +10,29 @@ type ChatMessage = {
 };
 
 const CHAT_STORAGE_KEY = 'spp-ai-chat-messages';
+const PROVIDER_STORAGE_KEY = 'spp-ai-provider';
 
 const isOpen = ref(false);
 const chatMessages = ref<ChatMessage[]>([]);
 const chatInput = ref('');
 const chatLoading = ref(false);
 const chatContainer = ref<HTMLElement | null>(null);
+const selectedProvider = ref(localStorage.getItem(PROVIDER_STORAGE_KEY) || 'deepseek');
 let abortController: AbortController | null = null;
+
+const providers = [
+    { value: 'deepseek', label: 'DeepSeek V4 Flash', model: 'deepseek-v4-flash' },
+    { value: 'gemini-35-flash', label: 'Gemini 3.5 Flash', model: 'gemini-3.5-flash' },
+    { value: 'gemini-25-flash', label: 'Gemini 2.5 Flash', model: 'gemini-2.5-flash' },
+    { value: 'gemini-25-pro', label: 'Gemini 2.5 Pro', model: 'gemini-2.5-pro' },
+    { value: 'gemini-2-flash', label: 'Gemini 2 Flash', model: 'gemini-2.0-flash' },
+    { value: 'gemini-2-flash-lite', label: 'Gemini 2 Flash Lite', model: 'gemini-2.0-flash-lite' },
+];
+
+function changeProvider(provider: string) {
+    selectedProvider.value = provider;
+    localStorage.setItem(PROVIDER_STORAGE_KEY, provider);
+}
 
 onMounted(() => {
     const saved = localStorage.getItem(CHAT_STORAGE_KEY);
@@ -72,7 +88,12 @@ async function sendMessage() {
                 ),
                 'Accept': 'application/json',
             },
-            body: JSON.stringify({ question, history: chatMessages.value.slice(-6) }),
+            body: JSON.stringify({
+                question,
+                history: chatMessages.value.slice(-6),
+                provider: selectedProvider.value.startsWith('gemini') ? 'gemini' : 'deepseek',
+                model: providers.find(p => p.value === selectedProvider.value)?.model ?? '',
+            }),
             signal: abortController.signal,
         });
 
@@ -190,17 +211,17 @@ function sendQuickQuestion(q: string) {
                 <div class="flex items-center gap-2">
                     <!-- Traffic Lights (Red Closes, Yellow Minimizes, Green Resets) -->
                     <div class="flex gap-1.5">
-                        <span 
+                        <span
                             class="h-3 w-3 rounded-full bg-[#FF5F56] border border-[#E0443E] cursor-pointer hover:opacity-85 active:scale-90 transition-transform"
                             title="Close"
                             @click="isOpen = false"
                         ></span>
-                        <span 
+                        <span
                             class="h-3 w-3 rounded-full bg-[#FFBD2E] border border-[#DEA123] cursor-pointer hover:opacity-85 active:scale-90 transition-transform"
                             title="Minimize"
                             @click="isOpen = false"
                         ></span>
-                        <span 
+                        <span
                             class="h-3 w-3 rounded-full bg-[#27C93F] border border-[#1AAB29] cursor-pointer hover:opacity-85 active:scale-90 transition-transform"
                             title="Reset Chat"
                             @click="resetChat"
@@ -210,7 +231,17 @@ function sendQuickQuestion(q: string) {
                 <div class="text-xs font-bold text-neutral-700 dark:text-neutral-200 flex items-center gap-1.5 tracking-wide">
                     <Bot class="h-3.5 w-3.5 text-primary" /> Asisten AI
                 </div>
-                <div>
+                <div class="flex items-center gap-1">
+                    <!-- Provider Dropdown -->
+                    <select
+                        :value="selectedProvider"
+                        class="rounded-md bg-neutral-200/60 dark:bg-zinc-800/60 px-2 py-0.5 text-[10px] font-medium text-neutral-700 dark:text-neutral-200 outline-none cursor-pointer"
+                        @change="changeProvider(($event.target as HTMLSelectElement).value)"
+                    >
+                        <option v-for="p in providers" :key="p.value" :value="p.value">
+                            {{ p.label }}
+                        </option>
+                    </select>
                     <button
                         v-if="chatMessages.length > 0"
                         class="rounded-lg p-1.5 transition-colors hover:bg-neutral-200/40 dark:hover:bg-zinc-800/40 text-neutral-500 hover:text-neutral-900 dark:hover:text-white cursor-pointer"
@@ -236,20 +267,20 @@ function sendQuickQuestion(q: string) {
                             Ajukan pertanyaan seputar data keuangan, laporan pemasukan, atau daftar tunggakan siswa.
                         </p>
                         <div class="mt-4 flex flex-col gap-2">
-                            <button 
-                                class="rounded-xl border border-neutral-200/40 dark:border-zinc-800/40 bg-white/40 dark:bg-zinc-900/40 px-3 py-2 text-left text-xs font-semibold text-neutral-700 dark:text-neutral-300 transition-colors hover:bg-neutral-50/80 dark:hover:bg-zinc-900/80 hover:border-neutral-300 dark:hover:border-zinc-700 cursor-pointer shadow-xs" 
+                            <button
+                                class="rounded-xl border border-neutral-200/40 dark:border-zinc-800/40 bg-white/40 dark:bg-zinc-900/40 px-3 py-2 text-left text-xs font-semibold text-neutral-700 dark:text-neutral-300 transition-colors hover:bg-neutral-50/80 dark:hover:bg-zinc-900/80 hover:border-neutral-300 dark:hover:border-zinc-700 cursor-pointer shadow-xs"
                                 @click="sendQuickQuestion('Berapa total tunggakan?')"
                             >
                                 💰 Berapa total tunggakan?
                             </button>
-                            <button 
-                                class="rounded-xl border border-neutral-200/40 dark:border-zinc-800/40 bg-white/40 dark:bg-zinc-900/40 px-3 py-2 text-left text-xs font-semibold text-neutral-700 dark:text-neutral-300 transition-colors hover:bg-neutral-50/80 dark:hover:bg-zinc-900/80 hover:border-neutral-300 dark:hover:border-zinc-700 cursor-pointer shadow-xs" 
+                            <button
+                                class="rounded-xl border border-neutral-200/40 dark:border-zinc-800/40 bg-white/40 dark:bg-zinc-900/40 px-3 py-2 text-left text-xs font-semibold text-neutral-700 dark:text-neutral-300 transition-colors hover:bg-neutral-50/80 dark:hover:bg-zinc-900/80 hover:border-neutral-300 dark:hover:border-zinc-700 cursor-pointer shadow-xs"
                                 @click="sendQuickQuestion('Siapa yang belum bayar bulan ini?')"
                             >
                                 📋 Siapa yang belum bayar?
                             </button>
-                            <button 
-                                class="rounded-xl border border-neutral-200/40 dark:border-zinc-800/40 bg-white/40 dark:bg-zinc-900/40 px-3 py-2 text-left text-xs font-semibold text-neutral-700 dark:text-neutral-300 transition-colors hover:bg-neutral-50/80 dark:hover:bg-zinc-900/80 hover:border-neutral-300 dark:hover:border-zinc-700 cursor-pointer shadow-xs" 
+                            <button
+                                class="rounded-xl border border-neutral-200/40 dark:border-zinc-800/40 bg-white/40 dark:bg-zinc-900/40 px-3 py-2 text-left text-xs font-semibold text-neutral-700 dark:text-neutral-300 transition-colors hover:bg-neutral-50/80 dark:hover:bg-zinc-900/80 hover:border-neutral-300 dark:hover:border-zinc-700 cursor-pointer shadow-xs"
                                 @click="sendQuickQuestion('Rekap pemasukan per bulan')"
                             >
                                 📊 Rekap pemasukan
@@ -302,19 +333,19 @@ function sendQuickQuestion(q: string) {
                         class="flex-1 tahoe-input h-9 px-3.5 text-xs"
                         :disabled="chatLoading"
                     />
-                    <button 
-                        v-if="!chatLoading" 
-                        type="submit" 
-                        :disabled="!chatInput.trim()" 
+                    <button
+                        v-if="!chatLoading"
+                        type="submit"
+                        :disabled="!chatInput.trim()"
                         class="tahoe-button-primary h-9 w-9 p-0 flex items-center justify-center shrink-0 cursor-pointer disabled:opacity-50"
                         title="Send Message"
                     >
                         <Send class="h-3.5 w-3.5 text-white" />
                     </button>
-                    <button 
-                        v-else 
-                        type="button" 
-                        class="h-9 w-9 rounded-xl border border-red-200 dark:border-red-950 bg-red-50 dark:bg-red-950/20 text-red-600 flex items-center justify-center shrink-0 cursor-pointer hover:bg-red-100" 
+                    <button
+                        v-else
+                        type="button"
+                        class="h-9 w-9 rounded-xl border border-red-200 dark:border-red-950 bg-red-50 dark:bg-red-950/20 text-red-600 flex items-center justify-center shrink-0 cursor-pointer hover:bg-red-100"
                         @click="cancelRequest"
                         title="Cancel Request"
                     >

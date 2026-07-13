@@ -1,0 +1,1 @@
+import{Cr as e,Wn as t,Xn as n,an as r,cr as i,jt as a,wr as o}from"./app-CV0MsPIr.js";var s=n({__name:`Spinner`,props:{class:{type:[Boolean,null,String,Object,Array]}},setup(n){let s=n;return(n,c)=>(i(),t(e(r),{role:`status`,"aria-label":`Loading`,class:o(e(a)(`size-4 animate-spin`,s.class))},null,8,[`class`]))}});export{s as t};

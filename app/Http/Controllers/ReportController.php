@@ -61,9 +61,13 @@ class ReportController extends Controller
             'history' => 'nullable|array',
             'history.*.role' => 'required|string|in:user,assistant',
             'history.*.content' => 'required|string',
+            'provider' => 'nullable|string|in:deepseek,gemini',
+            'model' => 'nullable|string|max:50',
         ]);
 
-        $service = new ReportAiService();
+        $provider = $validated['provider'] ?? 'deepseek';
+        $model = $validated['model'] ?? null;
+        $service = new ReportAiService($provider, $model);
         $answer = $service->ask($validated['question'], $validated['history'] ?? []);
 
         return response()->json(['answer' => $answer]);

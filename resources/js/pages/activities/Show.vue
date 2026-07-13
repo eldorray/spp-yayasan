@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowLeft } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
+import { ArrowLeft, Search } from 'lucide-vue-next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
     Table,
     TableBody,
@@ -49,6 +51,18 @@ const props = defineProps<{
     bills: Bill[];
 }>();
 
+const search = ref('');
+
+const filteredBills = computed(() => {
+    const q = search.value.trim().toLowerCase();
+    if (!q) return props.bills;
+    return props.bills.filter((bill) =>
+        bill.student.name.toLowerCase().includes(q) ||
+        bill.student.nis.toLowerCase().includes(q) ||
+        (bill.student.placements?.[0]?.classroom?.name ?? '').toLowerCase().includes(q)
+    );
+});
+
 function formatCurrency(value: number): string {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
 }
@@ -90,7 +104,13 @@ function statusVariant(status: string) {
 
         <!-- Bills Table -->
         <div class="rounded-xl bg-background p-6 shadow-sm">
-            <h3 class="mb-4 font-semibold">Daftar Tagihan ({{ bills.length }} siswa)</h3>
+            <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <h3 class="font-semibold">Daftar Tagihan ({{ filteredBills.length }} siswa)</h3>
+                <div class="relative w-full max-w-xs">
+                    <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input v-model="search" type="search" placeholder="Cari nama, NIS, atau kelas..." class="pl-9" />
+                </div>
+            </div>
             <div class="rounded-lg border">
                 <Table>
                     <TableHeader>
@@ -99,11 +119,12 @@ function statusVariant(status: string) {
                             <TableHead>Kelas</TableHead>
                             <TableHead>Tagihan</TableHead>
                             <TableHead>Terbayar</TableHead>
+                            <TableHead>Sisa</TableHead>
                             <TableHead>Status</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="bill in bills" :key="bill.id">
+                        <TableRow v-for="bill in filteredBills" :key="bill.id">
                             <TableCell>
                                 <div>
                                     <p class="font-medium">{{ bill.student.name }}</p>
@@ -113,13 +134,14 @@ function statusVariant(status: string) {
                             <TableCell>{{ bill.student.placements?.[0]?.classroom?.name ?? '—' }}</TableCell>
                             <TableCell>{{ formatCurrency(bill.amount) }}</TableCell>
                             <TableCell>{{ formatCurrency(bill.paid_amount) }}</TableCell>
+                            <TableCell>{{ formatCurrency(bill.amount - bill.paid_amount) }}</TableCell>
                             <TableCell>
                                 <Badge :variant="statusVariant(bill.status)">{{ statusLabel(bill.status) }}</Badge>
                             </TableCell>
                         </TableRow>
-                        <TableRow v-if="bills.length === 0">
-                            <TableCell colspan="5" class="py-12 text-center text-muted-foreground">
-                                Belum ada tagihan.
+                        <TableRow v-if="filteredBills.length === 0">
+                            <TableCell colspan="6" class="py-12 text-center text-muted-foreground">
+                                {{ bills.length === 0 ? 'Belum ada tagihan.' : 'Tidak ada hasil.' }}
                             </TableCell>
                         </TableRow>
                     </TableBody>
