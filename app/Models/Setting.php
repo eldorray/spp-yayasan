@@ -3,13 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class Setting extends Model
 {
     protected $primaryKey = 'key';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
-    
+
     protected $fillable = [
         'key',
         'value',
@@ -22,8 +25,11 @@ class Setting extends Model
     {
         try {
             $setting = self::find($key);
+
             return $setting ? $setting->value : $default;
         } catch (\Throwable $e) {
+            Log::error('Setting::get failed for key ['.$key.']: '.$e->getMessage());
+
             return $default;
         }
     }
@@ -39,7 +45,7 @@ class Setting extends Model
                 ['value' => $value]
             );
         } catch (\Throwable $e) {
-            // Silence database exceptions
+            Log::error('Setting::set failed for key ['.$key.']: '.$e->getMessage());
         }
     }
 }
